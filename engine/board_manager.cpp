@@ -89,6 +89,11 @@ void BoardManager::RemoveDamageZone(DamageZone* damageZone) {
     return;
 }
 
+void BoardManager::RemoveSpawnedCoin(Coin* coin) {
+    spawnedCoins_.erase(std::remove(spawnedCoins_.begin(), spawnedCoins_.end(), coin), spawnedCoins_.end());
+	return;
+}
+
 void BoardManager::InitializePlantSites(std::unordered_map<std::string, Mesh*>* meshes) {
     float leftOffset = 80.f;
     float squareOffset = 50.f;
@@ -125,8 +130,6 @@ void BoardManager::InitializePlants() {
 void BoardManager::InitializeLives(std::unordered_map<std::string, Mesh*>* meshes) {
     float xLife = SCREEN_WIDTH - LIVES_RIGHT_OFFSET - LIVES_SQUARE_OFFSET;
     float yLife = SCREEN_HEIGHT - LIVES_TOP_OFFSET - LIVES_SQUARE_SIDE;
-    //float xStar = xLife - LIVES_SQUARE_SIDE - LIVES_SQUARE_OFFSET;
-    //float yStar = yLife + LIVES_SQUARE_SIDE / 2 - STAR_SIDE / 2;
     glm::vec3 lifeCenter = glm::vec3(xLife, yLife, 0);
     glm::vec3 starCenter = glm::vec3(0, 0, 0);
     glm::vec3 lifeColor = glm::vec3(1, 0, 0); // red
@@ -143,15 +146,12 @@ void BoardManager::InitializeLives(std::unordered_map<std::string, Mesh*>* meshe
 		xLife -= LIVES_SQUARE_SIDE + LIVES_SQUARE_OFFSET;
 		lifeCenter = glm::vec3(xLife, yLife, 0);
 
-        // also add star representing initial coin (one in each iteration
+        // also add star representing initial coin (one in each iteration).
         BasicStar* star = assetFactory_->CreateBasicStar("lifeStar" + std::to_string(i), starCenter, STAR_SIDE, starColor);
         Mesh* starMesh = star->GetMesh();
 
         (*meshes)[starMesh->GetMeshID()] = starMesh;
         collectedCoins_.push_back(star);
-
-        //xStar -= LIVES_SQUARE_SIDE + LIVES_SQUARE_OFFSET;
-        //starCenter = glm::vec3(xStar, yStar, 0);
 	}
 
     return;
@@ -248,6 +248,31 @@ void BoardManager::InitializeInventory(std::unordered_map<std::string, Mesh*>* m
     }
 }
 
+void BoardManager::InitializeThreeCoins(std::unordered_map<std::string, Mesh*>* meshes) {
+    glm::vec3 color = glm::vec3(0.5f, 0.0f, 0.5f); // purple
+    glm::vec3 center = glm::vec3(0, 0, 1.0f);
+    std::random_device rd; // obtain a random number from hardware
+    std::mt19937 mt(rd()); // seed the generator
+
+    // get nr of spawned coins
+    int nrSpawnedCoins = GetNrLifeStars();
+
+    for (int i = nrSpawnedCoins; i < nrSpawnedCoins + NR_COINS_TO_SPAWN; i++) {
+        std::uniform_real_distribution<float> distX(0.f, 1280.f);
+        std::uniform_real_distribution<float> distY(0.f, 720.f);
+        float x = distX(mt);
+        float y = distY(mt);
+		Coin* coin = assetFactory_->CreateCoin("coin" + std::to_string(i), center, COIN_SIDE, color, x, y);
+
+		spawnedCoins_.push_back(coin);
+	}
+
+    return;
+}
+
+GameAssetFactory* BoardManager::GetAssetFactory() const {
+	return assetFactory_;
+}
 
 std::vector<PlantSite*> BoardManager::GetPlantSites() const {
     // Implementation for getting plant sites
@@ -281,6 +306,10 @@ std::vector<BasicStar*> BoardManager::GetCollectedCoins() const {
 
 DamageZone* BoardManager::GetDamageZone() const {
 	return damageZone_;
+}
+
+int BoardManager::GetNrLifeStars() const {
+	return collectedCoins_.size();
 }
 
 void BoardManager::ClearPlantSites() {

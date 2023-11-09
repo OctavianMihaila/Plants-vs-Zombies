@@ -5,10 +5,7 @@
 #include <iostream>
 
 #include "lab_m1/tema1/tema1.h"
-#include "lab_m1/tema1/assets/basic_objects.h"
-#include "lab_m1/tema1/utils/transf2D.h"
-#include "lab_m1/tema1/utils/game_asset_factory.h"
-#include "lab_m1/tema1/engine/board_manager.h"
+
 
 using namespace std;
 using namespace m1;
@@ -19,8 +16,7 @@ using namespace m1;
  */
 
 
-Tema1::Tema1()
-{
+Tema1::Tema1() : boardManager(NULL){
 }
 
 
@@ -40,12 +36,13 @@ void Tema1::Init()
     GetCameraInput()->SetActive(false);
 
     GameAssetFactory& assetFactory = GameAssetFactory::GetInstance();
-    BoardManager boardManager = BoardManager(&assetFactory);
+    boardManager = BoardManager(&assetFactory);
 
     boardManager.InitializePlantSites(&meshes);
     boardManager.InitializeDamageZone(&meshes);
     boardManager.InitializeLives(&meshes);
     boardManager.InitializeInventory(&meshes);
+    //boardManager.InitializeThreeCoins();
 
     //Mesh* square1 = basic_objects::CreateRectangle("square1", squareCorner, squareSide, squareSide, glm::vec3(1, 0, 0));
     //AddMeshToList(square1);
@@ -85,14 +82,26 @@ void Tema1::Update(float deltaTimeSeconds)
     modelMatrix = glm::mat3(1);
     float xLife = SCREEN_WIDTH - LIVES_RIGHT_OFFSET - LIVES_SQUARE_OFFSET;
     float yLife = SCREEN_HEIGHT - LIVES_TOP_OFFSET - LIVES_SQUARE_SIDE;
-    float xStar = xLife - LIVES_SQUARE_SIDE - LIVES_SQUARE_OFFSET + STAR_SYMMETRY_VALUE;
+    float xStar = xLife - LIVES_SQUARE_SIDE - STAR_SIDE + STAR_SYMMETRY_VALUE;
     float yStar = yLife - LIVES_SQUARE_SIDE / 2;
 
     for (int i = 0; i < NR_LIVES; i++) {
         RenderMesh2D(meshes["life" + std::to_string(i)], shaders["VertexColor"], modelMatrix);
-        RenderMesh2D(meshes["lifeStar" + std::to_string(i)], shaders["VertexColor"], modelMatrix * transf2D::Translate(xStar, yStar) * transf2D::Rotate(0.95));
 
         xStar -= (STAR_SIDE + STAR_OFFSET);
+    }
+
+    int nrLifeStars = boardManager.GetNrLifeStars();
+    xStar = xLife - 3 * (LIVES_SQUARE_SIDE) + STAR_SYMMETRY_VALUE + STAR_SIDE;
+
+    for (int i = 0; i < nrLifeStars; i++) {
+        // scale the star
+        std::vector<BasicStar*> collectedCoins = boardManager.GetCollectedCoins();
+        RenderMesh2D(collectedCoins[i]->GetMesh(), shaders["VertexColor"], modelMatrix * transf2D::Translate(xStar, yStar) * transf2D::Rotate(0.95));
+	
+        // print iteration number
+        std::cout << i << std::endl;
+        xStar += STAR_OFFSET + STAR_SIDE;
     }
 
     for (int i = 0; i < NR_INVENTORY_SLOTS; i++) {
@@ -114,25 +123,28 @@ void Tema1::Update(float deltaTimeSeconds)
 
     RenderMesh2D(meshes["damageZone"], shaders["VertexColor"], modelMatrix);
 
-    //modelMatrix = glm::mat4(1); // Identity matrix (no transformations)
-    //RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+    std::vector<Coin*> spawnedCoins = boardManager.GetSpawnedCoins();
 
-    //// draw a rectangle (no transformations)
-    //modelMatrix = glm::mat3(1);
-    //RenderMesh2D(meshes["rectangle1"], shaders["VertexColor"], modelMatrix);
+    if (!(spawnedCoins.empty())) {
+        // Translate the coins to a random position.
+    	std::random_device rd; // obtain a random number from hardware
+    	std::mt19937 mt(rd()); // seed the generator
 
-    //// draw a star (no transormations)
+        for (auto coin : spawnedCoins) {
+            float x = coin->GetXTranslate();
+            float y = coin->GetYTranslate();
 
-    //modelMatrix = glm::mat3(1);
-    // I want the star to be in the same position after rotation (i mean its center).
-    //modelMatrix = glm::mat3(1);
-    //RenderMesh2D(meshes["star1"], shaders["VertexColor"], modelMatrix * transf2D::Translate(500, 500) * transf2D::Rotate(0.95));
+			RenderMesh2D(coin->GetMesh(), shaders["VertexColor"], modelMatrix * transf2D::Translate(x, y) * transf2D::Rotate(0.95));
+		}
+    }
 
-    //modelMatrix = glm::mat3(1);
-    //RenderMesh2D(meshes["diamond1"], shaders["VertexColor"], modelMatrix);
-
-    //modelMatrix = glm::mat3(1);
-    //RenderMesh2D(meshes["hexagon1"], shaders["VertexColor"], modelMatrix);
+    if (Coin::IsTimeToSpawn()) {
+		boardManager.InitializeThreeCoins(&meshes);
+		Coin::UpdateSpawnTime();
+	}
+    else {
+		Coin::IncreaseWithDeltaTime(deltaTimeSeconds);
+	}
 }
 
 
@@ -160,14 +172,55 @@ void Tema1::OnKeyRelease(int key, int mods)
 
 void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
-    // Add mouse move event
+
+}
+
+// TODO: MOVE THIS ONE FROM THERE (maybe in utils).
+bool Tema1::IsPointInsideRect(const glm::vec2& point, const glm::vec2& rectPosition, float rectSize)
+{
+    float halfSize = rectSize / 2.0f;
+    float left = rectPosition.x - halfSize;
+    float right = rectPosition.x + halfSize;
+    float top = rectPosition.y - halfSize;
+    float bottom = rectPosition.y + halfSize;
+
+    return (point.x >= left && point.x <= right && point.y >= top && point.y <= bottom);
 }
 
 
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
-    // Add mouse button press event
+    if (button == GLFW_MOUSE_BUTTON_RIGHT)
+    {
+        int windowHeight = window->GetResolution().y;
+        int mouseYInScene = windowHeight - mouseY;
+        std::vector<Coin*> spawnedCoins_ = boardManager.GetSpawnedCoins();
+
+        for (Coin* coin : spawnedCoins_)
+        {
+            glm::vec2 coinPosition = glm::vec2(coin->GetXTranslate(), coin->GetYTranslate());
+
+            // Define an imaginary rectangle around the coin
+            glm::vec2 rectPosition = coinPosition;
+            float rectSize = STAR_SIDE * 2;
+
+            // Check if the mouse click is inside the imaginary rectangle around the star
+            if (IsPointInsideRect(glm::vec2(mouseX, mouseYInScene), rectPosition, rectSize)){
+                int starIndex = boardManager.GetNrLifeStars();
+                glm::vec3 starCenter = glm::vec3(0, 0, 0);
+                glm::vec3 starColor = glm::vec3(0.5f, 0.5f, 0.5f); // 
+                BasicStar *basicStar = boardManager.GetAssetFactory()->CreateBasicStar("lifeStar" + std::to_string(starIndex), starCenter, STAR_SIDE, starColor);
+
+                boardManager.AddCollectedCoin(basicStar);
+                boardManager.RemoveSpawnedCoin(coin);
+
+                break;
+            }
+        }
+    }
 }
+
+
 
 
 void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)

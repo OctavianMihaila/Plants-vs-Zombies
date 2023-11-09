@@ -12,8 +12,8 @@ BasicSquare* GameAssetFactory::CreateBasicSquare(const std::string& name, glm::v
 	return square;
 }
 
-Coin* GameAssetFactory::CreateCoin(const std::string& name, glm::vec3 center, float length, glm::vec3 color) {
-	Coin* coin = new Coin(name, center, length, color);
+Coin* GameAssetFactory::CreateCoin(const std::string& name, glm::vec3 center, float length, glm::vec3 color, float xTranslation, float yTranslation) {
+	Coin* coin = new Coin(name, center, length, color, xTranslation, yTranslation);
 	return coin;
 }
 

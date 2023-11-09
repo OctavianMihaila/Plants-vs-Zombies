@@ -4,28 +4,31 @@
 #include "../utils/game_asset_factory.h"
 #include <unordered_map>
 #include "components/simple_scene.h"
+#include "random"
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 #define NR_PLANT_SITES 9
 #define NR_LIVES 3
 #define NR_INVENTORY_SLOTS 4
+#define NR_COINS_TO_SPAWN 3
 #define STAR_SIDE 20.f
+#define COIN_SIDE 40.f
 #define INVENTORY_SQUARE_SIDE 125.f
-#define STAR_OFFSET 30.f // distance between stars
-#define INVENTORY_SQUARE_OFFSET 100.f // distance between squares
+#define LIVES_SQUARE_SIDE 75.f
+#define STAR_OFFSET 30.f // distance between stars in inventory and coins.
+#define INVENTORY_SQUARE_OFFSET 100.f // distance between squares.
 #define INVENTORY_STAR_LEFT_OFFSET 80.f
-#define STAR_SYMMETRY_VALUE 10.f
+#define STAR_SYMMETRY_VALUE 10.f // used for inventory stars and coins.
 #define INVENTORY_STAR_TOP_OFFSET 65.f
 #define INVENTORY_SQUARE_TOP_OFFSET 30.f
 #define INVENTORY_SQUARE_LEFT_OFFSET 60.f
-#define DIAMOND_WIDTH 50.f
-#define DIAMOND_HEIGHT 100.f
 #define LIVES_RIGHT_OFFSET 100.f
 #define LIVES_TOP_OFFSET 40.f
 #define LIVES_SQUARE_OFFSET 30.f
-#define LIVES_SQUARE_SIDE 75.f
 #define DAMAGE_ZONE_LEFT_OFFSET 10.f
+#define DIAMOND_WIDTH 50.f
+#define DIAMOND_HEIGHT 100.f
 #define DAMAGE_ZONE_LENGTH 50.f
 #define DAMAGE_ZONE_HEIGHT 400.f
 
@@ -51,6 +54,7 @@ public:
 	void RemoveCoin(Coin* coin);
 	void RemoveCollectedCoin(BasicStar* collectedCoin);
 	void RemoveDamageZone(DamageZone* damageZone);
+	void RemoveSpawnedCoin(Coin* coin);
 
 	void InitializePlantSites(std::unordered_map<std::string, Mesh*>* meshes);
 	void InitializePlantSpells();
@@ -60,8 +64,11 @@ public:
 	void InitializeCoins();
 	void InitializeCollectedCoins();
 	void InitializeDamageZone(std::unordered_map<std::string, Mesh*>* meshes);
+	void InitializeThreeCoins(std::unordered_map<std::string, Mesh*>* meshes);
 	void InitializeInventory(std::unordered_map<std::string, Mesh*>* meshes);
+	//void InitializeThreeCoins();
 
+	GameAssetFactory* GetAssetFactory() const;
 	std::vector<PlantSite*> GetPlantSites() const;
 	std::unordered_map<std::string, std::vector<PlantSpell*>> BoardManager::GetPlantSpells() const;
 	std::unordered_map<std::string, std::vector<Zombie*>> BoardManager::GetZombies() const;
@@ -70,6 +77,7 @@ public:
 	std::vector<Coin*> GetSpawnedCoins() const;
 	std::vector<BasicStar*> GetCollectedCoins() const;
 	DamageZone* GetDamageZone() const;
+	int GetNrLifeStars() const;
 
 	void ClearPlantSites();
 	void ClearPlantSpells();

@@ -16,7 +16,7 @@ public:
 
     BasicStar* CreateBasicStar(const std::string& name, glm::vec3 center, float length, glm::vec3 color);
     BasicSquare* CreateBasicSquare(const std::string& name, glm::vec3 center, float length, glm::vec3 color, bool fill);
-    Coin* CreateCoin(const std::string& name, glm::vec3 center, float length, glm::vec3 color);
+    Coin* GameAssetFactory::CreateCoin(const std::string& name, glm::vec3 center, float length, glm::vec3 color, float xTranslation, float yTranslation);
     DamageZone* CreateDamageZone(const std::string& name, glm::vec3 center, float length, float width, glm::vec3 color);
     PlantSite* CreatePlantSite(const std::string& name, glm::vec3 center, float length, glm::vec3 color);
     PlantSpell* CreatePlantSpell(const std::string& name, glm::vec3 center, float length, glm::vec3 color, int plantType);

@@ -1,6 +1,10 @@
 #pragma once
 
 #include "components/simple_scene.h"
+#include "lab_m1/tema1/assets/basic_objects.h"
+#include "lab_m1/tema1/utils/transf2D.h"
+#include "lab_m1/tema1/utils/game_asset_factory.h"
+#include "lab_m1/tema1/engine/board_manager.h"
 
 namespace m1
 {
@@ -27,9 +31,14 @@ namespace m1
         void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
         void OnWindowResize(int width, int height) override;
 
+        // TODO: MOVE THIS ONE FROM THERE
+        bool IsPointInsideRect(const glm::vec2& point, const glm::vec2& rectPosition, float rectSize);
+
+
         void RenderScene();
     protected:
         glm::mat3 modelMatrix;
+        BoardManager boardManager;
         
     };
 }   // namespace m1
