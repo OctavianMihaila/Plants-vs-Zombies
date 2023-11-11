@@ -8,10 +8,14 @@ public:
     PlantSite(const std::string& name, glm::vec3 corner, float length, glm::vec3 color);
     ~PlantSite();
 
-    void SetPlant(const Plant& plant);
+    void SetPlant(Plant* plant);
+    void SetPlantReadyToBeRemoved(bool readyToBeRemoved);
     bool IsEmpty() const;
+    bool IsPlantReadyToBeRemoved() const;
+    Plant* GetPlant() const;
 
 private:
-    Plant placedPlant_;
+    Plant* placedPlant_;
     bool isEmpty_;
+    bool plantReadyToBeRemoved_;
 };

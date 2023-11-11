@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include "components/simple_scene.h"
 #include "random"
+#include "lab_m1/tema1/utils/util_functions.h"
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
@@ -16,6 +17,7 @@
 #define COIN_SIDE 40.f
 #define INVENTORY_SQUARE_SIDE 125.f
 #define LIVES_SQUARE_SIDE 75.f
+#define PLANT_SITE_SQUARE_SIDE 125.f
 #define STAR_OFFSET 30.f // distance between stars in inventory and coins.
 #define INVENTORY_SQUARE_OFFSET 100.f // distance between squares.
 #define INVENTORY_STAR_LEFT_OFFSET 80.f
@@ -23,6 +25,8 @@
 #define INVENTORY_STAR_TOP_OFFSET 65.f
 #define INVENTORY_SQUARE_TOP_OFFSET 30.f
 #define INVENTORY_SQUARE_LEFT_OFFSET 60.f
+#define PLANT_SITE_SQUARE_LEFT_OFFSET 80.f
+#define PLANT_SITE_SQUARE_OFFSET 50.f
 #define LIVES_RIGHT_OFFSET 100.f
 #define LIVES_TOP_OFFSET 40.f
 #define LIVES_SQUARE_OFFSET 30.f
@@ -30,7 +34,8 @@
 #define DIAMOND_WIDTH 50.f
 #define DIAMOND_HEIGHT 100.f
 #define DAMAGE_ZONE_LENGTH 50.f
-#define DAMAGE_ZONE_HEIGHT 400.f
+#define DAMAGE_ZONE_HEIGHT 475.f
+#define ANIMATION_SPEED_RATE 1.0f
 
 class BoardManager {
 public:
@@ -44,6 +49,7 @@ public:
 	void AddLife(BasicSquare* life);
 	void AddCoin(Coin* coin);
 	void AddCollectedCoin(BasicStar* collectedCoin);
+	void AddInventorySquare(BasicSquare* inventorySquare);
 	void SetDamageZone(DamageZone* damageZone);
 
 	void RemovePlantSite(PlantSite* plantSite);
@@ -52,9 +58,10 @@ public:
 	void RemovePlant(Plant* plant);
 	void RemoveLife(BasicSquare* life);
 	void RemoveCoin(Coin* coin);
-	void RemoveCollectedCoin(BasicStar* collectedCoin);
 	void RemoveDamageZone(DamageZone* damageZone);
 	void RemoveSpawnedCoin(Coin* coin);
+	void RemoveCollectedCoins(int cost);
+
 
 	void InitializePlantSites(std::unordered_map<std::string, Mesh*>* meshes);
 	void InitializePlantSpells();
@@ -66,7 +73,8 @@ public:
 	void InitializeDamageZone(std::unordered_map<std::string, Mesh*>* meshes);
 	void InitializeThreeCoins(std::unordered_map<std::string, Mesh*>* meshes);
 	void InitializeInventory(std::unordered_map<std::string, Mesh*>* meshes);
-	//void InitializeThreeCoins();
+
+	void setCurrentlyDraggedPlant(Plant* plant);
 
 	GameAssetFactory* GetAssetFactory() const;
 	std::vector<PlantSite*> GetPlantSites() const;
@@ -76,7 +84,9 @@ public:
 	std::vector<BasicSquare*> GetLives() const;
 	std::vector<Coin*> GetSpawnedCoins() const;
 	std::vector<BasicStar*> GetCollectedCoins() const;
+	std::vector<BasicSquare*> GetInventorySquares() const;
 	DamageZone* GetDamageZone() const;
+	Plant* GetCurrentlyDraggedPlant() const;
 	int GetNrLifeStars() const;
 
 	void ClearPlantSites();
@@ -102,6 +112,8 @@ private:
 	std::unordered_map<std::string, std::vector<PlantSpell*>> plantSpells_;
 	std::unordered_map<std::string, std::vector<Zombie*>> zombies_;
 	std::vector<Plant*> plants_; // Plants from the upper part(those for drag and drop).
-	std::vector<BasicSquare*> lives_; // The lives of the player.
+	std::vector<BasicSquare*> lives_;
+	std::vector<BasicSquare*> inventorySquares_;
 	DamageZone* damageZone_;
+	Plant *currentlyDraggedPlant_;
 };

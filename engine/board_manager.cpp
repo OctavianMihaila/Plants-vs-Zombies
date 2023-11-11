@@ -1,7 +1,7 @@
 #include "board_manager.h"
 
 BoardManager::BoardManager(GameAssetFactory* assetFactory) : assetFactory_(assetFactory) {
-    // Constructor implementation
+    currentlyDraggedPlant_ = NULL;
 }
 
 BoardManager::~BoardManager() {}
@@ -44,6 +44,11 @@ void BoardManager::AddCollectedCoin(BasicStar* collectedCoin) {
     return;
 }
 
+void BoardManager::AddInventorySquare(BasicSquare* inventorySquare) {
+	inventorySquares_.push_back(inventorySquare);
+	return;
+}
+
 void BoardManager::SetDamageZone(DamageZone* damageZone) {
     // Implementation for setting the damage zone
     return;
@@ -79,11 +84,6 @@ void BoardManager::RemoveCoin(Coin* coin) {
     return;
 }
 
-void BoardManager::RemoveCollectedCoin(BasicStar* collectedCoin) {
-    // Implementation for removing a collected coin
-    return;
-}
-
 void BoardManager::RemoveDamageZone(DamageZone* damageZone) {
     // Implementation for removing the damage zone
     return;
@@ -94,21 +94,22 @@ void BoardManager::RemoveSpawnedCoin(Coin* coin) {
 	return;
 }
 
-void BoardManager::InitializePlantSites(std::unordered_map<std::string, Mesh*>* meshes) {
-    float leftOffset = 80.f;
-    float squareOffset = 50.f;
-    float squareSide = 100.f;
+void BoardManager::RemoveCollectedCoins(int cost) {
+    while (cost > 0) {
+		collectedCoins_.pop_back();
+		cost--;
+	}
+}
 
+void BoardManager::InitializePlantSites(std::unordered_map<std::string, Mesh*>* meshes) {
     for (int i = 0; i < NR_PLANT_SITES; i++) {
-        float x = leftOffset + (i % 3) * (squareSide + squareOffset);
-        float y = (2 - i / 3) * (squareSide + squareOffset);
+        float x = PLANT_SITE_SQUARE_LEFT_OFFSET + (i % 3) * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET);
+        float y = (2 - i / 3) * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET);
         glm::vec3 center = glm::vec3(x, y, 0);
         glm::vec3 color = glm::vec3(0, 1, 0); // green
-        PlantSite* plantSite = assetFactory_->CreatePlantSite("plantSite" + std::to_string(i), center, squareSide, color);
-        Mesh* mesh = plantSite->GetMesh();
-
-        (*meshes)[mesh->GetMeshID()] = mesh;
-        plantSites_.push_back(plantSite);
+        PlantSite* plantSite = assetFactory_->CreatePlantSite("plantSite" + std::to_string(i), center, PLANT_SITE_SQUARE_SIDE, color);
+        
+        AddPlantSite(plantSite);
     }
 }
 
@@ -193,37 +194,14 @@ void BoardManager::InitializeInventory(std::unordered_map<std::string, Mesh*>* m
     glm::vec3 center = glm::vec3(x, y, 0);
 
     for (int i = 0; i < NR_INVENTORY_SLOTS; i++) {
-        // Create empty square
+        // Creating inventory square in which the plant will be placed.
         BasicSquare* inventorySquare = assetFactory_->CreateBasicSquare("inventorySquare" + std::to_string(i), center, INVENTORY_SQUARE_SIDE, emptySquareColor, false);
-        Mesh* squareMesh = inventorySquare->GetMesh();
-        (*meshes)[squareMesh->GetMeshID()] = squareMesh;
+        AddInventorySquare(inventorySquare);
 
         // Create plant inside square
         int plantType = i + 1;
-        float cost;
-        glm::vec3 plantColor;
-
-        switch (plantType) {
-        case 1:
-            cost = 1;
-            plantColor = plantType1Color;
-            break;
-        case 2:
-            cost = 2;
-            plantColor = plantType2Color;
-            break;
-        case 3:
-            cost = 3;
-            plantColor = plantType3Color;
-            break;
-        case 4:
-            cost = 3;
-            plantColor = plantType4Color;
-            break;
-        default:
-            cost = 0;
-            std::cout << "Invalid plant type!" << std::endl;
-        }
+        float cost = CalculatePlantCost(plantType);
+        glm::vec3 plantColor = FindPlantColor(plantType);
 
         center = glm::vec3(x + INVENTORY_SQUARE_SIDE / 4, y + INVENTORY_SQUARE_SIDE / 2, 0);
         Plant* plant = assetFactory_->CreatePlant("inventoryPlant" + std::to_string(i), center, DIAMOND_WIDTH, DIAMOND_HEIGHT, plantColor, plantType, cost);
@@ -270,6 +248,10 @@ void BoardManager::InitializeThreeCoins(std::unordered_map<std::string, Mesh*>* 
     return;
 }
 
+void BoardManager::setCurrentlyDraggedPlant(Plant* plant) {
+	currentlyDraggedPlant_ = plant;
+}
+
 GameAssetFactory* BoardManager::GetAssetFactory() const {
 	return assetFactory_;
 }
@@ -308,8 +290,16 @@ DamageZone* BoardManager::GetDamageZone() const {
 	return damageZone_;
 }
 
+Plant* BoardManager::GetCurrentlyDraggedPlant() const {
+	return currentlyDraggedPlant_;
+}
+
 int BoardManager::GetNrLifeStars() const {
 	return collectedCoins_.size();
+}
+
+std::vector<BasicSquare*> BoardManager::GetInventorySquares() const {
+	return inventorySquares_;
 }
 
 void BoardManager::ClearPlantSites() {

@@ -11,16 +11,25 @@ public:
     Plant::Plant();
     ~Plant();
 
-    void LaunchSpell();
+    void SetXScale(float xScale);
+    void SetYScale(float yScale);
+    float GetXScale() const;
+    float GetYScale() const;
+    Mesh* GetMesh() const;
     int GetPlantType() const;
     int GetCost() const;
-    Mesh* GetMesh() const;
+    glm::vec3 GetPosition() const;
     bool IsPlaced() const;
     void PlacePlant();
+    void LaunchSpell();
 
 private:
-    Mesh* mesh_;
     int plantType_;
     int cost_;
     bool isPlaced_;
+    float xScale_;
+    float yScale_;
+    Mesh* mesh_;
+    glm::vec3 position_;
+
 };

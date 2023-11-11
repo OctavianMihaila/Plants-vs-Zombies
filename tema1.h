@@ -32,13 +32,15 @@ namespace m1
         void OnWindowResize(int width, int height) override;
 
         // TODO: MOVE THIS ONE FROM THERE
-        bool IsPointInsideRect(const glm::vec2& point, const glm::vec2& rectPosition, float rectSize);
-
+        bool IsPointInsideRect(const glm::vec3& point, const glm::vec3& rectPosition, float rectSize);
+        int FindSelectedPlantType(std::vector<BasicSquare*> inventorySquares, int mouseX, int mouseY);
 
         void RenderScene();
     protected:
         glm::mat3 modelMatrix;
         BoardManager boardManager;
+        float currentMouseX;
+        float currentMouseY;
         
     };
 }   // namespace m1

@@ -1,5 +1,3 @@
-#include "lab_m1/lab4/lab4.h"
-
 #include <vector>
 #include <string>
 #include <iostream>
@@ -42,23 +40,6 @@ void Tema1::Init()
     boardManager.InitializeDamageZone(&meshes);
     boardManager.InitializeLives(&meshes);
     boardManager.InitializeInventory(&meshes);
-    //boardManager.InitializeThreeCoins();
-
-    //Mesh* square1 = basic_objects::CreateRectangle("square1", squareCorner, squareSide, squareSide, glm::vec3(1, 0, 0));
-    //AddMeshToList(square1);
-
-    //Mesh* rectangle1 = basic_objects::CreateRectangle("rectangle1", rectangleCorner, rectangleSide, rectangleSide / 2, glm::vec3(0, 1, 0));
-    //AddMeshToList(rectangle1);
-
-    //Mesh* star1 = basic_objects::CreateStar("star1", glm::vec3(0, 0, 0), 50, glm::vec3(0, 0, 1));
-    //AddMeshToList(star1);
-   
-    //Mesh* diamond1 = basic_objects::CreateDiamond("diamond1", glm::vec3(400, 400, 0), 50, 100, glm::vec3(1, 1, 0));
-    //AddMeshToList(diamond1);
-
-    //Mesh* hexagon1 = basic_objects::CreateMergedHexagons("hexagon1", glm::vec3(500, 500, 0), 50, glm::vec3(1, 0, 1), glm::vec3(0, 1, 0));
-    ////Mesh* hexagon1 = basic_objects::CreateDoubleHexagon("hexagon1", glm::vec3(500, 500, 0), 50, glm::vec3(1, 0, 1));
-    //AddMeshToList(hexagon1);
 }
 
 void Tema1::FrameStart()
@@ -99,13 +80,13 @@ void Tema1::Update(float deltaTimeSeconds)
         std::vector<BasicStar*> collectedCoins = boardManager.GetCollectedCoins();
         RenderMesh2D(collectedCoins[i]->GetMesh(), shaders["VertexColor"], modelMatrix * transf2D::Translate(xStar, yStar) * transf2D::Rotate(0.95));
 	
-        // print iteration number
-        std::cout << i << std::endl;
         xStar += STAR_OFFSET + STAR_SIDE;
     }
 
+    std::vector<BasicSquare*> inventorySquares = boardManager.GetInventorySquares();
+
     for (int i = 0; i < NR_INVENTORY_SLOTS; i++) {
-		RenderMesh2D(meshes["inventorySquare" + std::to_string(i)], shaders["VertexColor"], modelMatrix);
+        RenderMesh2D(inventorySquares[i]->GetMesh(), shaders["VertexColor"], modelMatrix);
         RenderMesh2D(meshes["inventoryPlant" + std::to_string(i)], shaders["VertexColor"], modelMatrix);
 
         int nrStars = i + 1;
@@ -117,11 +98,56 @@ void Tema1::Update(float deltaTimeSeconds)
         }
 	}
 
+    std::vector<PlantSite*> plantSites = boardManager.GetPlantSites();
+
     for (int i = 0; i < NR_PLANT_SITES; i++) {
-        RenderMesh2D(meshes["plantSite" + std::to_string(i)], shaders["VertexColor"], modelMatrix);
+        RenderMesh2D(plantSites[i]->GetMesh(), shaders["VertexColor"], modelMatrix);
+        PlantSite* plantSite = plantSites[i];
+        Plant* plant = plantSite->GetPlant();
+
+        if (!plantSite->IsEmpty()) {
+            glm::vec3 plantSitePosition = plantSite->GetPosition();
+            glm::vec3 plantPosition = plantSite->GetPlant()->GetPosition();
+            // Placing the plant in the center of the plant site.
+            float xTranslate = plantSitePosition.x - plantPosition.x + PLANT_SITE_SQUARE_SIDE / 4;
+            float yTranslate = plantSitePosition.y - plantPosition.y + PLANT_SITE_SQUARE_SIDE / 2;
+
+            if (plantSite->IsPlantReadyToBeRemoved()) {
+                float xScale = plant->GetXScale();
+                float yScale = plant->GetYScale();
+                float newXScale = xScale - deltaTimeSeconds * ANIMATION_SPEED_RATE;
+                float newYScale = yScale - deltaTimeSeconds * ANIMATION_SPEED_RATE;
+
+                plant->SetXScale(newXScale);
+                plant->SetYScale(newYScale);
+
+                // Ensure the scale doesn't go below zero.
+                if (newXScale < 0.0f || newYScale < 0.0f) {
+                    plantSite->SetPlant(NULL);
+                    plantSite->SetPlantReadyToBeRemoved(false);
+                }
+            }
+
+            RenderMesh2D(plant->GetMesh(), shaders["VertexColor"], modelMatrix
+                * transf2D::Translate(xTranslate, yTranslate)
+                * transf2D::Translate(plantPosition.x, plantPosition.y)
+                * transf2D::Scale(plant->GetXScale(), plant->GetYScale())
+                * transf2D::Translate(-plantPosition.x, -plantPosition.y));
+		}
     }
 
     RenderMesh2D(meshes["damageZone"], shaders["VertexColor"], modelMatrix);
+
+    // Render the dragged plant.
+    Plant* currentlyDraggedPlant = boardManager.GetCurrentlyDraggedPlant();
+    if (currentlyDraggedPlant != NULL) {
+
+        glm::vec3 plantPosition = currentlyDraggedPlant->GetPosition();
+        float xTranslate = currentMouseX - plantPosition.x - DIAMOND_WIDTH / 2;
+        float yTranslate = currentMouseY - plantPosition.y;
+
+        RenderMesh2D(currentlyDraggedPlant->GetMesh(), shaders["VertexColor"], modelMatrix * transf2D::Translate(xTranslate, yTranslate));
+	}
 
     std::vector<Coin*> spawnedCoins = boardManager.GetSpawnedCoins();
 
@@ -169,14 +195,16 @@ void Tema1::OnKeyRelease(int key, int mods)
     // Add key release event
 }
 
+void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY) {
+    int windowHeight = window->GetResolution().y;
 
-void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
-{
 
+    currentMouseX = mouseX;
+    currentMouseY = windowHeight - mouseY;
 }
 
 // TODO: MOVE THIS ONE FROM THERE (maybe in utils).
-bool Tema1::IsPointInsideRect(const glm::vec2& point, const glm::vec2& rectPosition, float rectSize)
+bool Tema1::IsPointInsideRect(const glm::vec3& point, const glm::vec3& rectPosition, float rectSize)
 {
     float halfSize = rectSize / 2.0f;
     float left = rectPosition.x - halfSize;
@@ -187,25 +215,40 @@ bool Tema1::IsPointInsideRect(const glm::vec2& point, const glm::vec2& rectPosit
     return (point.x >= left && point.x <= right && point.y >= top && point.y <= bottom);
 }
 
+int Tema1::FindSelectedPlantType(std::vector<BasicSquare*> inventorySquares, int mouseX, int mouseY) {
+
+    for (int i = 0; i < NR_INVENTORY_SLOTS; i++) {
+        BasicSquare* inventorySquare = inventorySquares[i];
+        glm::vec3 inventorySquarePosition = inventorySquare->GetPosition();
+        glm::vec3 clickPosition = glm::vec3(mouseX, mouseY, 0);
+
+        if (CheckClickInSquare(mouseX, mouseY, inventorySquarePosition.x, inventorySquarePosition.y, INVENTORY_SQUARE_SIDE)) {
+            return i + 1; // +1 because the plant types start from 1.
+        }
+    }
+
+    return -1; // click was outside the inventory.
+}
+
 
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
-    if (button == GLFW_MOUSE_BUTTON_RIGHT)
-    {
-        int windowHeight = window->GetResolution().y;
-        int mouseYInScene = windowHeight - mouseY;
+    bool wasCoinClicked = false;
+    int windowHeight = window->GetResolution().y;
+    int mouseYInScene = windowHeight - mouseY;
+
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) { // this is left click, but in the framework it is called right click.
         std::vector<Coin*> spawnedCoins_ = boardManager.GetSpawnedCoins();
 
-        for (Coin* coin : spawnedCoins_)
-        {
-            glm::vec2 coinPosition = glm::vec2(coin->GetXTranslate(), coin->GetYTranslate());
+        for (Coin* coin : spawnedCoins_) {
+            glm::vec3 coinPosition = glm::vec3(coin->GetXTranslate(), coin->GetYTranslate(), 0);
 
             // Define an imaginary rectangle around the coin
-            glm::vec2 rectPosition = coinPosition;
+            glm::vec3 rectPosition = coinPosition;
             float rectSize = STAR_SIDE * 2;
 
             // Check if the mouse click is inside the imaginary rectangle around the star
-            if (IsPointInsideRect(glm::vec2(mouseX, mouseYInScene), rectPosition, rectSize)){
+            if (IsPointInsideRect(glm::vec3(mouseX, mouseYInScene, 0), rectPosition, rectSize)){
                 int starIndex = boardManager.GetNrLifeStars();
                 glm::vec3 starCenter = glm::vec3(0, 0, 0);
                 glm::vec3 starColor = glm::vec3(0.5f, 0.5f, 0.5f); // 
@@ -214,8 +257,39 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
                 boardManager.AddCollectedCoin(basicStar);
                 boardManager.RemoveSpawnedCoin(coin);
 
+                wasCoinClicked = true;
                 break;
             }
+        }
+    }
+
+    if (button == GLFW_MOUSE_BUTTON_3) { // this is right click, but in the framework it is called left click.
+        // handle plant despawning
+        std::vector<PlantSite*> plantSites = boardManager.GetPlantSites();
+
+        for (PlantSite* plantSite : plantSites) {
+			glm::vec3 plantSitePosition = plantSite->GetPosition();
+			glm::vec3 clickPosition = glm::vec3(mouseX, mouseYInScene, 0);
+
+			if (CheckClickInSquare(mouseX, mouseYInScene, plantSitePosition.x, plantSitePosition.y, PLANT_SITE_SQUARE_SIDE)) {
+                if (!plantSite->IsEmpty()) {
+                    //plantSite->SetPlant(NULL); // remove the plant from the plant site.
+                    plantSite->SetPlantReadyToBeRemoved(true);
+					break;
+				}
+			}
+		}
+    }
+
+    if (!wasCoinClicked && button != GLFW_MOUSE_BUTTON_3) {
+   	    int selectedPlantType = FindSelectedPlantType(boardManager.GetInventorySquares(), mouseX, mouseYInScene);
+
+        if (selectedPlantType != -1) {
+            int cost = CalculatePlantCost(selectedPlantType);
+            glm::vec3 plantColor = FindPlantColor(selectedPlantType);
+
+            Plant* draggedPlant = boardManager.GetAssetFactory()->CreatePlant("draggedPlant", glm::vec3(mouseX + DIAMOND_WIDTH / 2, mouseYInScene, 1), DIAMOND_WIDTH, DIAMOND_HEIGHT, plantColor, selectedPlantType, cost);
+            boardManager.setCurrentlyDraggedPlant(draggedPlant);
         }
     }
 }
@@ -225,7 +299,34 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 
 void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 {
-    // Add mouse button release event
+    Plant* currentlyDraggedPlant = boardManager.GetCurrentlyDraggedPlant();
+    int windowHeight = window->GetResolution().y;
+    int mouseYInScene = windowHeight - mouseY;
+
+    // check if the mouse was released on a plant site. If not then the plant should be removed. Otherwise, the plant should be placed on the plant site. Also set the currentDraggedPlant to NULL.
+    if (currentlyDraggedPlant != NULL) {
+		std::vector<PlantSite*> plantSites = boardManager.GetPlantSites();
+
+        for (PlantSite* plantSite : plantSites) {
+			glm::vec3 plantSitePosition = plantSite->GetPosition();
+			glm::vec3 clickPosition = glm::vec3(mouseX, mouseYInScene, 0);
+
+			if (CheckClickInSquare(mouseX, mouseYInScene, plantSitePosition.x, plantSitePosition.y, PLANT_SITE_SQUARE_SIDE)) {
+                int cost = currentlyDraggedPlant->GetCost();
+                int nrCoins = boardManager.GetCollectedCoins().size();
+                // place the plant on the plant site.
+                if (plantSite->IsEmpty() && cost <= nrCoins) {
+                    plantSite->SetPlant(currentlyDraggedPlant);
+                    boardManager.RemoveCollectedCoins(cost);
+                    break;
+				}
+                
+            }
+            
+        }
+
+        boardManager.setCurrentlyDraggedPlant(NULL);
+    }
 }
 
 
