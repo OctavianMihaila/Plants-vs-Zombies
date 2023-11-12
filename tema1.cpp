@@ -101,9 +101,10 @@ void Tema1::Update(float deltaTimeSeconds)
     std::vector<PlantSite*> plantSites = boardManager.GetPlantSites();
 
     for (int i = 0; i < NR_PLANT_SITES; i++) {
-        RenderMesh2D(plantSites[i]->GetMesh(), shaders["VertexColor"], modelMatrix);
         PlantSite* plantSite = plantSites[i];
         Plant* plant = plantSite->GetPlant();
+        RenderMesh2D(plantSite->GetMesh(), shaders["VertexColor"], modelMatrix);
+
 
         if (!plantSite->IsEmpty()) {
             glm::vec3 plantSitePosition = plantSite->GetPosition();
@@ -126,6 +127,18 @@ void Tema1::Update(float deltaTimeSeconds)
                     plantSite->SetPlant(NULL);
                     plantSite->SetPlantReadyToBeRemoved(false);
                 }
+            } else {
+                if (plant->GetLaunchCooldown() < 0.0f) {
+                    int line = i / 3 + 1;
+                    glm::vec3 launchPosition = plantSite->GetPosition();
+
+                    launchPosition.z = 1.0f;
+                    boardManager.LaunchSpell(line, plant->GetPlantType(), launchPosition);
+                    plant->ResetLaunchCooldown();
+				}
+                else {
+					plant->DecrementLaunchCooldown(deltaTimeSeconds);
+				}
             }
 
             RenderMesh2D(plant->GetMesh(), shaders["VertexColor"], modelMatrix
@@ -148,6 +161,48 @@ void Tema1::Update(float deltaTimeSeconds)
 
         RenderMesh2D(currentlyDraggedPlant->GetMesh(), shaders["VertexColor"], modelMatrix * transf2D::Translate(xTranslate, yTranslate));
 	}
+
+    // ############################################# STARS AND HEXAGONS #############################################
+
+    std::unordered_map<std::string, std::vector<PlantSpell*>> plantSpells = boardManager.GetPlantSpells();
+
+    // itterate through the map and render the spells.
+    for (auto const& x : plantSpells) {
+		std::vector<PlantSpell*> plantSpells = x.second;
+        std::string spellHash = x.first;
+        int line = spellHash[0] - '0';
+        int plantType = spellHash[1] - '0';
+        glm::vec3 plantColor = FindPlantColor(plantType);
+
+        for (PlantSpell* plantSpell : plantSpells) {
+			glm::vec3 plantSpellCenter = plantSpell->GetPosition();
+
+
+            RenderMesh2D(plantSpell->GetMesh(), shaders["VertexColor"], modelMatrix
+                * transf2D::Translate(plantSpellCenter.x + INVENTORY_SQUARE_SIDE / 2, plantSpellCenter.y + INVENTORY_SQUARE_SIDE / 2) // translate to the center of the plant site.
+                * transf2D::Translate(plantSpell->GetXTravelDistance(), 0) // translate to the current x travel distance.
+                * transf2D::Rotate(plantSpell->GetRotationValue()) // rotate the plant spell.
+                * transf2D::Translate(-plantSpellCenter.x, -plantSpellCenter.y)); // translate back to the center of the plant spell.
+
+            plantSpell->IncreaseXTravelDistance(deltaTimeSeconds * SPELL_MOVE_SPEED_RATE);
+            if (plantSpell->GetXTravelDistance() > SCREEN_WIDTH - plantSpellCenter.x) {
+                std::cout<<"Spell reached the end of the screen!"<<std::endl;
+				boardManager.RemovePlantSpell(plantSpell, spellHash);
+			}
+
+            plantSpell->IncreaseRotationValue(deltaTimeSeconds * ROTATION_SPEED_RATE);
+
+            if (plantSpell->GetRotationValue() > 360.0f) {
+				plantSpell->ResetRotationValue();
+            }
+		}
+	}
+
+
+
+
+
+    // ############################################# STARS AND HEXAGONS #############################################
 
     std::vector<Coin*> spawnedCoins = boardManager.GetSpawnedCoins();
 
@@ -198,6 +253,7 @@ void Tema1::OnKeyRelease(int key, int mods)
 void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY) {
     int windowHeight = window->GetResolution().y;
 
+    //std::cout<<"MouseX: "<<mouseX<<" MouseY: "<<windowHeight - mouseY<<std::endl;
 
     currentMouseX = mouseX;
     currentMouseY = windowHeight - mouseY;

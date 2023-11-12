@@ -7,6 +7,7 @@ Plant::Plant(const std::string& name, glm::vec3 center, float width, float heigh
     yScale_ = 1.0f;
     isPlaced_ = false;
     plantType_ = plantType;
+    launchCooldown_ = SPELL_LAUNCH_INTERVAL;
     cost_ = cost;
 }
 
@@ -34,6 +35,10 @@ float Plant::GetYScale() const {
 	return yScale_;
 }
 
+float Plant::GetLaunchCooldown() const {
+    return launchCooldown_;
+}
+
 Mesh* Plant::GetMesh() const {
     return mesh_;
 }
@@ -58,7 +63,10 @@ void Plant::PlacePlant() {
     isPlaced_ = true;
 }
 
-void Plant::LaunchSpell() {
-    // Add logic to launch a spell or perform plant-related actions.
-    // You can use plantType_ to determine what kind of spell to launch.
+void Plant::DecrementLaunchCooldown(float deltaTime) {
+	launchCooldown_ -= deltaTime;
+}
+
+void Plant::ResetLaunchCooldown() {
+	launchCooldown_ = SPELL_LAUNCH_INTERVAL;
 }

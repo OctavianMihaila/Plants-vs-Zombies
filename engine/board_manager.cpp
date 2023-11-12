@@ -59,9 +59,19 @@ void BoardManager::RemovePlantSite(PlantSite* plantSite) {
     return;
 }
 
-void BoardManager::RemovePlantSpell(PlantSpell* plantSpell) {
-    // Implementation for removing a plant spell
-    return;
+void BoardManager::RemovePlantSpell(PlantSpell* plantSpell, const std::string& spellHash) {
+    auto iterator = plantSpells_.find(spellHash);
+
+    if (iterator != plantSpells_.end()) {
+        auto& plantVector = iterator->second; // Getting the vector of plant spells that corresponds to the key.
+        plantVector.erase(std::remove(plantVector.begin(), plantVector.end(), plantSpell), plantVector.end());
+
+        delete plantSpell;
+
+        if (plantVector.empty()) {
+            plantSpells_.erase(iterator);
+        }
+    }
 }
 
 void BoardManager::RemoveZombie(Zombie* zombie) {
@@ -246,6 +256,14 @@ void BoardManager::InitializeThreeCoins(std::unordered_map<std::string, Mesh*>* 
 	}
 
     return;
+}
+
+void BoardManager::LaunchSpell(int line, int plantType, glm::vec3 center) {
+    std::string spellHash = std::to_string(line) + std::to_string(plantType);
+    glm::vec3 color = FindPlantColor(plantType);
+    PlantSpell* plantSpell = assetFactory_->CreatePlantSpell("spell" + spellHash, center, SPELL_STAR_SIDE, color, plantType);
+
+    AddPlantSpell(plantSpell, spellHash);
 }
 
 void BoardManager::setCurrentlyDraggedPlant(Plant* plant) {

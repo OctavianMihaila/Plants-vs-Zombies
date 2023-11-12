@@ -15,6 +15,7 @@
 #define NR_COINS_TO_SPAWN 3
 #define STAR_SIDE 20.f
 #define COIN_SIDE 40.f
+#define SPELL_STAR_SIDE 30.f
 #define INVENTORY_SQUARE_SIDE 125.f
 #define LIVES_SQUARE_SIDE 75.f
 #define PLANT_SITE_SQUARE_SIDE 125.f
@@ -36,6 +37,8 @@
 #define DAMAGE_ZONE_LENGTH 50.f
 #define DAMAGE_ZONE_HEIGHT 475.f
 #define ANIMATION_SPEED_RATE 1.0f
+#define SPELL_MOVE_SPEED_RATE 100.0f
+#define ROTATION_SPEED_RATE 5.0f
 
 class BoardManager {
 public:
@@ -53,7 +56,8 @@ public:
 	void SetDamageZone(DamageZone* damageZone);
 
 	void RemovePlantSite(PlantSite* plantSite);
-	void RemovePlantSpell(PlantSpell* plantSpell);
+	//void RemovePlantSpell(PlantSpell* plantSpell, std::string spellHash);
+	void RemovePlantSpell(PlantSpell* plantSpell, const std::string& spellHash);
 	void RemoveZombie(Zombie* zombie);
 	void RemovePlant(Plant* plant);
 	void RemoveLife(BasicSquare* life);
@@ -73,6 +77,8 @@ public:
 	void InitializeDamageZone(std::unordered_map<std::string, Mesh*>* meshes);
 	void InitializeThreeCoins(std::unordered_map<std::string, Mesh*>* meshes);
 	void InitializeInventory(std::unordered_map<std::string, Mesh*>* meshes);
+	void LaunchSpell(int line, int plantType, glm::vec3 center);
+
 
 	void setCurrentlyDraggedPlant(Plant* plant);
 
@@ -115,5 +121,5 @@ private:
 	std::vector<BasicSquare*> lives_;
 	std::vector<BasicSquare*> inventorySquares_;
 	DamageZone* damageZone_;
-	Plant *currentlyDraggedPlant_;
+	Plant* currentlyDraggedPlant_;
 };
