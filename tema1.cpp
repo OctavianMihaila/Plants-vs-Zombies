@@ -59,6 +59,12 @@ void Tema1::RenderScene() {
 
 void Tema1::Update(float deltaTimeSeconds)
 {
+    if (boardManager.GetLives().empty()) {
+        // TODO: FREE RESOURCES !!!
+		std::cout<<"Game over!"<<std::endl;
+		exit(0);
+	}
+
     glm::ivec2 resolution = window->GetResolution();
     modelMatrix = glm::mat3(1);
     float xLife = SCREEN_WIDTH - LIVES_RIGHT_OFFSET - LIVES_SQUARE_OFFSET;
@@ -66,8 +72,12 @@ void Tema1::Update(float deltaTimeSeconds)
     float xStar = xLife - LIVES_SQUARE_SIDE - STAR_SIDE + STAR_SYMMETRY_VALUE;
     float yStar = yLife - LIVES_SQUARE_SIDE / 2;
 
-    for (int i = 0; i < NR_LIVES; i++) {
-        RenderMesh2D(meshes["life" + std::to_string(i)], shaders["VertexColor"], modelMatrix);
+    std::vector<BasicSquare*> lives = boardManager.GetLives();
+
+    //std::cout<<lives.size()<<std::endl;
+
+    for (int i = 0; i < lives.size(); i++) {
+        RenderMesh2D(lives[i]->GetMesh(), shaders["VertexColor"], modelMatrix);
 
         xStar -= (STAR_SIDE + STAR_OFFSET);
     }
@@ -128,7 +138,12 @@ void Tema1::Update(float deltaTimeSeconds)
                     plantSite->SetPlantReadyToBeRemoved(false);
                 }
             } else {
-                if (plant->GetLaunchCooldown() < 0.0f) {
+                int line = i / 3 + 1;
+                int type = plant->GetPlantType();
+                std::string spellHash = std::to_string(line) + std::to_string(type);
+                std::vector<Zombie*> zombies = boardManager.GetZombies()[spellHash];
+
+                if (CheckZombieTypeInVector(type, zombies) && plant->GetLaunchCooldown() < 0.0f) {
                     int line = i / 3 + 1;
                     glm::vec3 launchPosition = plantSite->GetPosition();
 
@@ -166,26 +181,30 @@ void Tema1::Update(float deltaTimeSeconds)
 
     std::unordered_map<std::string, std::vector<PlantSpell*>> plantSpells = boardManager.GetPlantSpells();
 
-    // itterate through the map and render the spells.
+    // Render the plant spells.
     for (auto const& x : plantSpells) {
 		std::vector<PlantSpell*> plantSpells = x.second;
         std::string spellHash = x.first;
-        int line = spellHash[0] - '0';
         int plantType = spellHash[1] - '0';
         glm::vec3 plantColor = FindPlantColor(plantType);
 
+        // spells with a specific plant type and row.
         for (PlantSpell* plantSpell : plantSpells) {
 			glm::vec3 plantSpellCenter = plantSpell->GetPosition();
 
 
             RenderMesh2D(plantSpell->GetMesh(), shaders["VertexColor"], modelMatrix
                 * transf2D::Translate(plantSpellCenter.x + INVENTORY_SQUARE_SIDE / 2, plantSpellCenter.y + INVENTORY_SQUARE_SIDE / 2) // translate to the center of the plant site.
-                * transf2D::Translate(plantSpell->GetXTravelDistance(), 0) // translate to the current x travel distance.
                 * transf2D::Rotate(plantSpell->GetRotationValue()) // rotate the plant spell.
-                * transf2D::Translate(-plantSpellCenter.x, -plantSpellCenter.y)); // translate back to the center of the plant spell.
+                * transf2D::Translate(-plantSpellCenter.x + plantSpell->GetXTravelDistance(), -plantSpellCenter.y)); // translate back to the center of the plant spell.
 
+            float oldXTravelDistance = plantSpell->GetXTravelDistance();
+            float newXTravelDistance = oldXTravelDistance + deltaTimeSeconds * SPELL_MOVE_SPEED_RATE;
             plantSpell->IncreaseXTravelDistance(deltaTimeSeconds * SPELL_MOVE_SPEED_RATE);
-            if (plantSpell->GetXTravelDistance() > SCREEN_WIDTH - plantSpellCenter.x) {
+            plantSpell->UpdatePosition(oldXTravelDistance, newXTravelDistance);
+
+            if (plantSpell->GetPosition().x > SCREEN_WIDTH) {
+                std::cout<<"Plant spell center x: "<<plantSpellCenter.x<<std::endl;
                 std::cout<<"Spell reached the end of the screen!"<<std::endl;
 				boardManager.RemovePlantSpell(plantSpell, spellHash);
 			}
@@ -198,19 +217,124 @@ void Tema1::Update(float deltaTimeSeconds)
 		}
 	}
 
+    // render the zombies.
+    std::unordered_map<std::string, std::vector<Zombie*>> zombies = boardManager.GetZombies();
 
+    for (auto const& x : zombies) {
+        std::vector<Zombie*> zombies = x.second;
+        std::string zombieHash = x.first;
+        int line = zombieHash[0] - '0';
+        int zombieType = zombieHash[1] - '0';
+        int i = 0;
+        for (Zombie* zombie : zombies) {
+			glm::vec3 zombieCenter = zombie->GetPosition();
+            i++;
+            while (1) {
+                //std::cout << "Zombie center " << i << " : " << zombieCenter.x << std::endl;
+                // sleep 1 second
+                //_sleep(100);
+                break;
+            }
 
+            RenderMesh2D(zombie->GetMesh(), shaders["VertexColor"], modelMatrix
+                * transf2D::Translate(zombieCenter.x, zombieCenter.y)
+                * transf2D::Scale(zombie->GetXScale(), zombie->GetYScale())
+                * transf2D::Translate(-zombieCenter.x, -zombieCenter.y)
+                * transf2D::Translate(-zombie->GetXTravelDistance(), 0)
+            );
 
+            if (zombie->IsReadyToBeRemoved()) {
+                float xScale = zombie->GetXScale();
+                float yScale = zombie->GetYScale();
+                float newXScale = xScale - deltaTimeSeconds * ANIMATION_SPEED_RATE;
+                float newYScale = yScale - deltaTimeSeconds * ANIMATION_SPEED_RATE;
+
+                zombie->SetXScale(newXScale);
+                zombie->SetYScale(newYScale);
+
+                // Ensure the scale doesn't go below zero.
+                if (newXScale < 0.0f || newYScale < 0.0f) {
+                    boardManager.RemoveZombie(zombie, zombieHash);
+                    zombie->SetReadyToBeRemoved(false);
+                }
+            }
+
+            // TODO: MAYBE MAKE A FUNCTION OUT OF THAT, BECAUSE IT IS USED IN THE PLANT SPELLS TOO.
+            float oldXTravelDistance = zombie->GetXTravelDistance();
+            float newXTravelDistance = oldXTravelDistance + deltaTimeSeconds * ZOMBIE_MOVE_SPEED_RATE;
+            zombie->IncreaseXTravelDistance(deltaTimeSeconds * ZOMBIE_MOVE_SPEED_RATE);
+            //std::cout<<"zombie poz: "<< zombie->GetPosition()<<std::endl; // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+            zombie->UpdatePosition(oldXTravelDistance, newXTravelDistance);
+
+            if (zombie->GetXTravelDistance() > SCREEN_WIDTH - DAMAGE_ZONE_LEFT_OFFSET - DAMAGE_ZONE_LENGTH) {
+                boardManager.RemoveLife();
+                boardManager.RemoveZombie(zombie, zombieHash);
+
+                break;
+            }
+
+            int count = 0;
+            // If zombie is one one of the plantSites and that plantSite has a plant on it, then the plant should be removed.
+            for (PlantSite* plantSite : plantSites) {
+
+                if (!plantSite->IsEmpty()) {
+                    float plantSiteRightOffset = SCREEN_WIDTH - PLANT_SITE_SQUARE_LEFT_OFFSET - (count % 3) * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET) - PLANT_SITE_SQUARE_SIDE;
+                    if (line == ((count / 3) + 1) && zombie->GetXTravelDistance() > plantSiteRightOffset && zombie->GetXTravelDistance() < plantSiteRightOffset + PLANT_SITE_SQUARE_SIDE) {
+                        std::cout << "LINE: " << line << std::endl;
+                        std::cout << "COUT: " << count << std::endl;
+                         plantSite->SetPlantReadyToBeRemoved(true);
+                    }
+                }
+
+                count++;
+            }
+
+            // zombie and plantSpell collision handling.
+            std::unordered_map<std::string, std::vector<PlantSpell*>> plantSpells = boardManager.GetPlantSpells();
+
+            for (auto const& x : plantSpells) {
+				std::vector<PlantSpell*> plantSpells = x.second;
+				std::string spellHash = x.first;
+				int plantType = spellHash[1] - '0';
+				glm::vec3 plantColor = FindPlantColor(plantType);
+                int i = 0;
+				// spells with a specific plant type and row.
+                for (PlantSpell* plantSpell : plantSpells) {
+                    i++;
+                    //std::cout << "Plant spell: " << i << " center: " << plantSpell->GetPosition().x << std::endl;
+					glm::vec3 plantSpellCenter = plantSpell->GetPosition();
+                    glm::vec3 zombieCenter = zombie->GetPosition();
+                    float plantRadius = plantSpell->GetRadius();
+                    float zombieRadius = zombie->GetRadius();
+
+                   if (CheckCollision(plantSpellCenter, zombieCenter, plantRadius, zombieRadius) && spellHash == zombieHash) {
+						    boardManager.RemovePlantSpell(plantSpell, spellHash);
+                            if (zombie->GetTotalDamageTaken() == 2 && !zombie->IsReadyToBeRemoved()) {
+                                //boardManager.RemoveZombie(zombie, zombieHash);
+                                zombie->AjustPosition(zombie->GetRadius(), zombie->GetRadius());
+                                zombie->SetReadyToBeRemoved(true);
+                            } else {
+								zombie->TakeDamage(1);
+                            }
+						    break;
+				    }
+				    
+				}
+			}
+
+       /*    if (zombie->GetTotalDamageTaken() >= 3) {
+				boardManager.RemoveZombie(zombie, zombieHash);
+				break;
+			}*/
+
+        }
+    }
 
     // ############################################# STARS AND HEXAGONS #############################################
 
     std::vector<Coin*> spawnedCoins = boardManager.GetSpawnedCoins();
 
     if (!(spawnedCoins.empty())) {
-        // Translate the coins to a random position.
-    	std::random_device rd; // obtain a random number from hardware
-    	std::mt19937 mt(rd()); // seed the generator
-
         for (auto coin : spawnedCoins) {
             float x = coin->GetXTranslate();
             float y = coin->GetYTranslate();
@@ -226,6 +350,14 @@ void Tema1::Update(float deltaTimeSeconds)
     else {
 		Coin::IncreaseWithDeltaTime(deltaTimeSeconds);
 	}
+
+    if (Zombie::IsTimeToSpawn()) {
+        boardManager.LaunchZombie();
+        Zombie::UpdateSpawnTime();
+    }
+    else {
+        Zombie::IncreaseWithDeltaTime(deltaTimeSeconds);
+    }
 }
 
 

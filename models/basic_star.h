@@ -9,9 +9,13 @@ public:
 
     Mesh* GetMesh() const;
     glm::vec3 GetPosition() const;
+    float GetRadius() const;
     void SetPosition(const glm::vec3& newPosition);
+    void CalculateRadius();
+    void BasicStar::UpdatePosition(float oldXTravelDistance_, float newTravelDistance_);
 
 private:
     Mesh* mesh_;
     glm::vec3 position_;
+    float radius_;
 };

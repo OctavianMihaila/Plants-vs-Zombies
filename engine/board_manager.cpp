@@ -74,8 +74,12 @@ void BoardManager::RemovePlantSpell(PlantSpell* plantSpell, const std::string& s
     }
 }
 
-void BoardManager::RemoveZombie(Zombie* zombie) {
-    // Implementation for removing a zombie
+void BoardManager::RemoveZombie(Zombie* zombie, std::string zombieHash) {
+    std::vector<Zombie*> zombies = zombies_[zombieHash];
+    zombies.erase(std::remove(zombies.begin(), zombies.end(), zombie), zombies.end());
+    zombies_[zombieHash] = zombies;
+    delete zombie;
+
     return;
 }
 
@@ -84,8 +88,9 @@ void BoardManager::RemovePlant(Plant* plant) {
     return;
 }
 
-void BoardManager::RemoveLife(BasicSquare* life) {
-    // Implementation for removing a life
+void BoardManager::RemoveLife() {
+    lives_.pop_back();
+
     return;
 }
 
@@ -238,7 +243,7 @@ void BoardManager::InitializeInventory(std::unordered_map<std::string, Mesh*>* m
 
 void BoardManager::InitializeThreeCoins(std::unordered_map<std::string, Mesh*>* meshes) {
     glm::vec3 color = glm::vec3(0.5f, 0.0f, 0.5f); // purple
-    glm::vec3 center = glm::vec3(0, 0, 1.0f);
+    glm::vec3 center = glm::vec3(0, 0, 10.0f);
     std::random_device rd; // obtain a random number from hardware
     std::mt19937 mt(rd()); // seed the generator
 
@@ -254,6 +259,26 @@ void BoardManager::InitializeThreeCoins(std::unordered_map<std::string, Mesh*>* 
 
 		spawnedCoins_.push_back(coin);
 	}
+
+    return;
+}
+void BoardManager::LaunchZombie() {
+    std::random_device rd; // obtain a random number from hardware
+    std::mt19937 mt(rd()); // seed the generator
+
+    // i need to generate a randoom string for the key (first digit must be between 1 and 3 and the second between 1 and 4)
+    std::uniform_int_distribution<int> distLine(1, 3);
+    std::uniform_int_distribution<int> distZombieType(1, 4);
+
+    int line = distLine(mt);
+    int zombieType = distZombieType(mt);
+    std::string zombieHash = std::to_string(line) + std::to_string(zombieType);
+    glm::vec3 center = glm::vec3(SCREEN_WIDTH, (3 - line) * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET) + PLANT_SITE_SQUARE_OFFSET / 2, 3.0f);
+    glm::vec3 neutralHexagonColor = glm::vec3(0.5f, 0.5f, 0.5f); // grey
+    glm::vec3 zombieColor = FindPlantColor(zombieType); // We can use this function for zombies as well.
+
+    Zombie* zombie = assetFactory_->CreateZombie("zombie" + zombieHash, center, ZOMBIE_SIDE, zombieColor, neutralHexagonColor, zombieType);
+    AddZombie(zombie, zombieHash);
 
     return;
 }

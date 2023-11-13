@@ -5,7 +5,6 @@
 DamageZone::DamageZone(const std::string& name, glm::vec3 center, float length, float width, glm::vec3 color) {
     // Create the mesh for the damage zone using the provided parameters
     mesh_ = basic_objects::CreateRectangle(name, center, length, width, color, true);
-    totalDamageTaken_ = 0;
 }
 
 DamageZone::~DamageZone() {

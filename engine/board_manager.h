@@ -16,6 +16,7 @@
 #define STAR_SIDE 20.f
 #define COIN_SIDE 40.f
 #define SPELL_STAR_SIDE 30.f
+#define ZOMBIE_SIDE 40.f
 #define INVENTORY_SQUARE_SIDE 125.f
 #define LIVES_SQUARE_SIDE 75.f
 #define PLANT_SITE_SQUARE_SIDE 125.f
@@ -38,6 +39,7 @@
 #define DAMAGE_ZONE_HEIGHT 475.f
 #define ANIMATION_SPEED_RATE 1.0f
 #define SPELL_MOVE_SPEED_RATE 100.0f
+#define ZOMBIE_MOVE_SPEED_RATE 65.0f
 #define ROTATION_SPEED_RATE 5.0f
 
 class BoardManager {
@@ -58,9 +60,9 @@ public:
 	void RemovePlantSite(PlantSite* plantSite);
 	//void RemovePlantSpell(PlantSpell* plantSpell, std::string spellHash);
 	void RemovePlantSpell(PlantSpell* plantSpell, const std::string& spellHash);
-	void RemoveZombie(Zombie* zombie);
+	void RemoveZombie(Zombie* zombie, std::string zombieType);
 	void RemovePlant(Plant* plant);
-	void RemoveLife(BasicSquare* life);
+	void RemoveLife();
 	void RemoveCoin(Coin* coin);
 	void RemoveDamageZone(DamageZone* damageZone);
 	void RemoveSpawnedCoin(Coin* coin);
@@ -77,6 +79,7 @@ public:
 	void InitializeDamageZone(std::unordered_map<std::string, Mesh*>* meshes);
 	void InitializeThreeCoins(std::unordered_map<std::string, Mesh*>* meshes);
 	void InitializeInventory(std::unordered_map<std::string, Mesh*>* meshes);
+	void LaunchZombie();
 	void LaunchSpell(int line, int plantType, glm::vec3 center);
 
 

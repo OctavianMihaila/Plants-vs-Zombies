@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include "../assets/basic_objects.h"
 
-#define SPELL_LAUNCH_INTERVAL 3.0f
+#define SPELL_LAUNCH_INTERVAL 2.0f // original 3.0f
 
 class Plant {
 public:
