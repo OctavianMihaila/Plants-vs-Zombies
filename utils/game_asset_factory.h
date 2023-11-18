@@ -23,13 +23,8 @@ public:
     Zombie* CreateZombie(const std::string& name, glm::vec3 center, float length, glm::vec3 firstHexagonColor, glm::vec3 secondHexagonColor, int zombieType);
     Plant* CreatePlant(const std::string& name, glm::vec3 center, float width, float height, glm::vec3 color, int plantType, int cost);
     void DestroyObject(Mesh* object);
-
-    // Add any other public methods or members as needed
-
 private:
-    GameAssetFactory() {} // Private constructor
-
-    // Prevent copy/move operations
+    GameAssetFactory() {}
     GameAssetFactory(const GameAssetFactory&) = delete;
     GameAssetFactory& operator=(const GameAssetFactory&) = delete;
 };

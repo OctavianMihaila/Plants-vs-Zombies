@@ -12,6 +12,6 @@ public:
 	void SetPosition(const glm::vec3& newPosition);
 
 private:
-	Mesh* mesh_;
 	glm::vec3 position_;
+	Mesh* mesh_;
 };

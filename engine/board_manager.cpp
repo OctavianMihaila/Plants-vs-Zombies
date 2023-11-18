@@ -9,7 +9,6 @@ BoardManager::~BoardManager() {}
 void BoardManager::AddPlantSite(PlantSite* plantSite) {
     plantSites_.push_back(plantSite);
     return;
-
 }
 
 void BoardManager::AddPlantSpell(PlantSpell* plantSpell, std::string key) {
@@ -34,11 +33,6 @@ void BoardManager::AddLife(BasicSquare* life) {
     return;
 }
 
-void BoardManager::AddCoin(Coin* coin) {
-    spawnedCoins_.push_back(coin);
-    return;
-}
-
 void BoardManager::AddCollectedCoin(BasicStar* collectedCoin) {
     collectedCoins_.push_back(collectedCoin);
     return;
@@ -49,14 +43,14 @@ void BoardManager::AddInventorySquare(BasicSquare* inventorySquare) {
 	return;
 }
 
-void BoardManager::SetDamageZone(DamageZone* damageZone) {
-    // Implementation for setting the damage zone
-    return;
+void BoardManager::AddInventoryStar(BasicStar* inventoryStar) {
+	inventoryStars_.push_back(inventoryStar);
+	return;
 }
 
-void BoardManager::RemovePlantSite(PlantSite* plantSite) {
-    // Implementation for removing a plant site
-    return;
+void BoardManager::AddInventoryPlant(Plant* inventoryPlant) {
+    inventoryPlants_.push_back(inventoryPlant);
+	return;
 }
 
 void BoardManager::RemovePlantSpell(PlantSpell* plantSpell, const std::string& spellHash) {
@@ -76,15 +70,11 @@ void BoardManager::RemovePlantSpell(PlantSpell* plantSpell, const std::string& s
 
 void BoardManager::RemoveZombie(Zombie* zombie, std::string zombieHash) {
     std::vector<Zombie*> zombies = zombies_[zombieHash];
+
     zombies.erase(std::remove(zombies.begin(), zombies.end(), zombie), zombies.end());
     zombies_[zombieHash] = zombies;
     delete zombie;
 
-    return;
-}
-
-void BoardManager::RemovePlant(Plant* plant) {
-    // Implementation for removing a plant
     return;
 }
 
@@ -94,18 +84,9 @@ void BoardManager::RemoveLife() {
     return;
 }
 
-void BoardManager::RemoveCoin(Coin* coin) {
-    // Implementation for removing a coin
-    return;
-}
-
-void BoardManager::RemoveDamageZone(DamageZone* damageZone) {
-    // Implementation for removing the damage zone
-    return;
-}
-
 void BoardManager::RemoveSpawnedCoin(Coin* coin) {
     spawnedCoins_.erase(std::remove(spawnedCoins_.begin(), spawnedCoins_.end(), coin), spawnedCoins_.end());
+
 	return;
 }
 
@@ -116,94 +97,58 @@ void BoardManager::RemoveCollectedCoins(int cost) {
 	}
 }
 
-void BoardManager::InitializePlantSites(std::unordered_map<std::string, Mesh*>* meshes) {
+void BoardManager::InitializePlantSites() {
     for (int i = 0; i < NR_PLANT_SITES; i++) {
         float x = PLANT_SITE_SQUARE_LEFT_OFFSET + (i % 3) * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET);
         float y = (2 - i / 3) * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET);
         glm::vec3 center = glm::vec3(x, y, 0);
-        glm::vec3 color = glm::vec3(0, 1, 0); // green
+        glm::vec3 color = glm::vec3(0, 1, 0); // Green.
         PlantSite* plantSite = assetFactory_->CreatePlantSite("plantSite" + std::to_string(i), center, PLANT_SITE_SQUARE_SIDE, color);
         
         AddPlantSite(plantSite);
     }
 }
 
-void BoardManager::InitializePlantSpells() {
-    // Implementation for initializing plant spells
-    return;
-}
-
-void BoardManager::InitializeZombies() {
-    // Implementation for initializing zombies
-    return;
-}
-
-void BoardManager::InitializePlants() {
-    // Implementation for initializing plants
-    return;
-}
-
-void BoardManager::InitializeLives(std::unordered_map<std::string, Mesh*>* meshes) {
+void BoardManager::InitializeLives() {
     float xLife = SCREEN_WIDTH - LIVES_RIGHT_OFFSET - LIVES_SQUARE_OFFSET;
     float yLife = SCREEN_HEIGHT - LIVES_TOP_OFFSET - LIVES_SQUARE_SIDE;
     glm::vec3 lifeCenter = glm::vec3(xLife, yLife, 0);
     glm::vec3 starCenter = glm::vec3(0, 0, 0);
-    glm::vec3 lifeColor = glm::vec3(1, 0, 0); // red
-    glm::vec3 starColor = glm::vec3(0.5f, 0.5f, 0.5f); // grey
-
+    glm::vec3 lifeColor = glm::vec3(1, 0, 0); // Red.
+    glm::vec3 starColor = glm::vec3(0.5f, 0.5f, 0.5f); // Grey
 
     for (int i = 0; i < NR_LIVES; i++) {
 		BasicSquare* life = assetFactory_->CreateBasicSquare("life" + std::to_string(i), lifeCenter, LIVES_SQUARE_SIDE, lifeColor, true);
-        Mesh* mesh = life->GetMesh();
-
-		(*meshes)[mesh->GetMeshID()] = mesh;
 		lives_.push_back(life);
 
 		xLife -= LIVES_SQUARE_SIDE + LIVES_SQUARE_OFFSET;
 		lifeCenter = glm::vec3(xLife, yLife, 0);
 
-        // also add star representing initial coin (one in each iteration).
+        // Also add star representing initial coin (one in each iteration).
         BasicStar* star = assetFactory_->CreateBasicStar("lifeStar" + std::to_string(i), starCenter, STAR_SIDE, starColor);
-        Mesh* starMesh = star->GetMesh();
-
-        (*meshes)[starMesh->GetMeshID()] = starMesh;
         collectedCoins_.push_back(star);
 	}
 
     return;
 }
 
-void BoardManager::InitializeCoins() {
-    // Implementation for initializing coins
-    return;
-}
-
-void BoardManager::InitializeCollectedCoins() {
-    // Implementation for initializing collected coins
-    return;
-}
-
-void BoardManager::InitializeDamageZone(std::unordered_map<std::string, Mesh*>* meshes) {
+void BoardManager::InitializeDamageZone() {
     glm::vec3 center = glm::vec3(DAMAGE_ZONE_LEFT_OFFSET, 0, 0);
-    glm::vec3 color = glm::vec3(1, 0, 0); // red
+    glm::vec3 color = glm::vec3(1, 0, 0); // Red
     DamageZone* damageZone = assetFactory_->CreateDamageZone("damageZone", center, DAMAGE_ZONE_LENGTH, DAMAGE_ZONE_HEIGHT, color);
-    Mesh * mesh = damageZone->GetMesh();
 
-	(*meshes)[mesh->GetMeshID()] = mesh;
     damageZone_ = damageZone;
 
     return;
 }
 
-void BoardManager::InitializeInventory(std::unordered_map<std::string, Mesh*>* meshes) {
-    glm::vec3 emptySquareColor = glm::vec3(0.5f, 0.35f, 0.05f); // brown
-    glm::vec3 starColor = glm::vec3(0.5f, 0.5f, 0.5f); // grey
-    glm::vec3 plantType1Color = glm::vec3(1, 0.5f, 0); // orange
-    glm::vec3 plantType2Color = glm::vec3(0, 0, 1); // blue
-    glm::vec3 plantType3Color = glm::vec3(1, 1, 0); // yellow
-    glm::vec3 plantType4Color = glm::vec3(1, 0, 1); // purple
-
-
+void BoardManager::InitializeInventory() {
+    glm::vec3 emptySquareColor = glm::vec3(0.5f, 0.35f, 0.05f); // Brown.
+    glm::vec3 starColor = glm::vec3(0.5f, 0.5f, 0.5f); // Grey.
+    glm::vec3 plantType1Color = glm::vec3(1, 0.5f, 0); // Orange.
+    glm::vec3 plantType2Color = glm::vec3(0, 0, 1); // Blue.
+    glm::vec3 plantType3Color = glm::vec3(1, 1, 0); // Yellow.
+    glm::vec3 plantType4Color = glm::vec3(1, 0, 1); // Purple.
     float x = INVENTORY_SQUARE_LEFT_OFFSET;
     float y = SCREEN_HEIGHT - INVENTORY_SQUARE_TOP_OFFSET - INVENTORY_SQUARE_SIDE;
     glm::vec3 center = glm::vec3(x, y, 0);
@@ -213,42 +158,38 @@ void BoardManager::InitializeInventory(std::unordered_map<std::string, Mesh*>* m
         BasicSquare* inventorySquare = assetFactory_->CreateBasicSquare("inventorySquare" + std::to_string(i), center, INVENTORY_SQUARE_SIDE, emptySquareColor, false);
         AddInventorySquare(inventorySquare);
 
-        // Create plant inside square
+        // Create plant inside square.
         int plantType = i + 1;
         float cost = CalculatePlantCost(plantType);
         glm::vec3 plantColor = FindPlantColor(plantType);
 
         center = glm::vec3(x + INVENTORY_SQUARE_SIDE / 4, y + INVENTORY_SQUARE_SIDE / 2, 0);
         Plant* plant = assetFactory_->CreatePlant("inventoryPlant" + std::to_string(i), center, DIAMOND_WIDTH, DIAMOND_HEIGHT, plantColor, plantType, cost);
-        Mesh* plantMesh = plant->GetMesh();
-        (*meshes)[plantMesh->GetMeshID()] = plantMesh;
+        AddInventoryPlant(plant);
 
         int nrStars = plantType;
         if (plantType == 3 || plantType == 4) {
             nrStars--;
-		}
- 
+        }
+
         // Display stars under the square (cost).
         glm::vec3 starCenter = glm::vec3(0, 0, 0);
         for (int j = 0; j < nrStars; j++) {
-			BasicStar* star = assetFactory_->CreateBasicStar("inventoryStar" + std::to_string(i) + std::to_string(j), starCenter, STAR_SIDE, starColor);
-			Mesh* starMesh = star->GetMesh();
-			(*meshes)[starMesh->GetMeshID()] = starMesh;
-		}
+            BasicStar* star = assetFactory_->CreateBasicStar("inventoryStar" + std::to_string(i) + std::to_string(j), starCenter, STAR_SIDE, starColor);
+            AddInventoryStar(star);
+        }
 
         x += INVENTORY_SQUARE_SIDE + INVENTORY_SQUARE_OFFSET;
         center = glm::vec3(x, y, 0);
     }
 }
 
-void BoardManager::InitializeThreeCoins(std::unordered_map<std::string, Mesh*>* meshes) {
-    glm::vec3 color = glm::vec3(0.5f, 0.0f, 0.5f); // purple
+void BoardManager::InitializeThreeCoins() {
+    glm::vec3 color = glm::vec3(0.5f, 0.0f, 0.5f); // Purple
     glm::vec3 center = glm::vec3(0, 0, 10.0f);
-    std::random_device rd; // obtain a random number from hardware
-    std::mt19937 mt(rd()); // seed the generator
-
-    // get nr of spawned coins
-    int nrSpawnedCoins = GetNrLifeStars();
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    int nrSpawnedCoins = GetNrCollectedCoins();
 
     for (int i = nrSpawnedCoins; i < nrSpawnedCoins + NR_COINS_TO_SPAWN; i++) {
         std::uniform_real_distribution<float> distX(0.f, 1280.f);
@@ -262,11 +203,11 @@ void BoardManager::InitializeThreeCoins(std::unordered_map<std::string, Mesh*>* 
 
     return;
 }
-void BoardManager::LaunchZombie() {
-    std::random_device rd; // obtain a random number from hardware
-    std::mt19937 mt(rd()); // seed the generator
 
-    // i need to generate a randoom string for the key (first digit must be between 1 and 3 and the second between 1 and 4)
+void BoardManager::LaunchZombie() {
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    // Generating a randoom string for the key (first digit must be between 1 and 3 and the second between 1 and 4).
     std::uniform_int_distribution<int> distLine(1, 3);
     std::uniform_int_distribution<int> distZombieType(1, 4);
 
@@ -274,8 +215,8 @@ void BoardManager::LaunchZombie() {
     int zombieType = distZombieType(mt);
     std::string zombieHash = std::to_string(line) + std::to_string(zombieType);
     glm::vec3 center = glm::vec3(SCREEN_WIDTH, (3 - line) * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET) + PLANT_SITE_SQUARE_OFFSET / 2, 3.0f);
-    glm::vec3 neutralHexagonColor = glm::vec3(0.5f, 0.5f, 0.5f); // grey
-    glm::vec3 zombieColor = FindPlantColor(zombieType); // We can use this function for zombies as well.
+    glm::vec3 neutralHexagonColor = glm::vec3(0.5f, 0.5f, 0.5f); // Grey.
+    glm::vec3 zombieColor = FindPlantColor(zombieType); // This function can be used for zombies as well.
 
     Zombie* zombie = assetFactory_->CreateZombie("zombie" + zombieHash, center, ZOMBIE_SIDE, zombieColor, neutralHexagonColor, zombieType);
     AddZombie(zombie, zombieHash);
@@ -300,21 +241,15 @@ GameAssetFactory* BoardManager::GetAssetFactory() const {
 }
 
 std::vector<PlantSite*> BoardManager::GetPlantSites() const {
-    // Implementation for getting plant sites
     return plantSites_;
 }
 
 std::unordered_map<std::string, std::vector<PlantSpell*>> BoardManager::GetPlantSpells() const {
-    // Implementation for getting plant spells
     return plantSpells_;
 }
 
 std::unordered_map<std::string, std::vector<Zombie*>> BoardManager::GetZombies() const {
     return zombies_;
-}
-
-std::vector<Plant*> BoardManager::GetPlants() const {
-    return plants_;
 }
 
 std::vector<BasicSquare*> BoardManager::GetLives() const {
@@ -337,7 +272,7 @@ Plant* BoardManager::GetCurrentlyDraggedPlant() const {
 	return currentlyDraggedPlant_;
 }
 
-int BoardManager::GetNrLifeStars() const {
+int BoardManager::GetNrCollectedCoins() const {
 	return collectedCoins_.size();
 }
 
@@ -345,50 +280,10 @@ std::vector<BasicSquare*> BoardManager::GetInventorySquares() const {
 	return inventorySquares_;
 }
 
-void BoardManager::ClearPlantSites() {
-    // TODO
-    return;
+std::vector<BasicStar*> BoardManager::GetInventoryStars() const {
+	return inventoryStars_;
 }
 
-void BoardManager::ClearPlantSpells() {
-    // TODO
-    return;
-}
-
-void BoardManager::ClearZombies() {
-    // TODO
-    return;
-}
-
-void BoardManager::ClearPlants() {
-    // TODO
-    return;
-}
-
-void BoardManager::ClearLives() {
-    // TODO
-    return;
-}
-
-void BoardManager::ClearSpawnedCoins() {
-    // TODO
-    return;
-}
-
-void BoardManager::ClearCollectedCoins() {
-    // TODO
-    return;
-}
-
-void BoardManager::ClearDamageZone() {
-    // TODO
-    return;
-}
-
-void BoardManager::Update(float deltaTime) {
-    // Implementation for the Update function
-}
-
-void BoardManager::Draw(const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
-    // Implementation for the Draw function
+std::vector<Plant*> BoardManager::GetInventoryPlants() const {
+	return inventoryPlants_;
 }

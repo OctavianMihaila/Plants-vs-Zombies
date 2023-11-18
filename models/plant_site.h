@@ -10,12 +10,13 @@ public:
 
     void SetPlant(Plant* plant);
     void SetPlantReadyToBeRemoved(bool readyToBeRemoved);
+    Plant* GetPlant() const;
     bool IsEmpty() const;
     bool IsPlantReadyToBeRemoved() const;
-    Plant* GetPlant() const;
 
 private:
-    Plant* placedPlant_;
     bool isEmpty_;
     bool plantReadyToBeRemoved_;
+    Plant* placedPlant_;
+
 };

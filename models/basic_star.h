@@ -15,7 +15,7 @@ public:
     void BasicStar::UpdatePosition(float oldXTravelDistance_, float newTravelDistance_);
 
 private:
-    Mesh* mesh_;
-    glm::vec3 position_;
     float radius_;
+    glm::vec3 position_;
+    Mesh* mesh_;
 };

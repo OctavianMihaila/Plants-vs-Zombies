@@ -8,8 +8,6 @@ public:
 	~DamageZone();
 
 	Mesh* GetMesh() const;
-	void RemoveLife();
-
 private:
 	Mesh* mesh_;
 };

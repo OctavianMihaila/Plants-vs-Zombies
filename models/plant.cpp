@@ -11,12 +11,8 @@ Plant::Plant(const std::string& name, glm::vec3 center, float width, float heigh
     cost_ = cost;
 }
 
-Plant::Plant() {
-	// Create default constructor.
-}
-
 Plant::~Plant() {
-    // Clean up any resources if needed.
+    delete mesh_;
 }
 
 void Plant::SetXScale(float xScale) {
@@ -39,10 +35,6 @@ float Plant::GetLaunchCooldown() const {
     return launchCooldown_;
 }
 
-Mesh* Plant::GetMesh() const {
-    return mesh_;
-}
-
 int Plant::GetPlantType() const {
     return plantType_;
 }
@@ -52,7 +44,11 @@ int Plant::GetCost() const {
 }
 
 glm::vec3 Plant::GetPosition() const {
-	return position_;
+    return position_;
+}
+
+Mesh* Plant::GetMesh() const {
+    return mesh_;
 }
 
 bool Plant::IsPlaced() const {

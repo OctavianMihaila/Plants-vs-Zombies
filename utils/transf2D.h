@@ -12,8 +12,7 @@
 
 namespace transf2D
 {
-    inline glm::mat3 Translate(float translateX, float translateY)
-    {
+    inline glm::mat3 Translate(float translateX, float translateY) {
         return glm::mat3(
             1, 0, 0,
             0, 1, 0,
@@ -22,8 +21,7 @@ namespace transf2D
 
     }
 
-    inline glm::mat3 Scale(float scaleX, float scaleY)
-    {
+    inline glm::mat3 Scale(float scaleX, float scaleY) {
         return glm::mat3(
             scaleX, 0, 0,
             0, scaleY, 0,
@@ -32,8 +30,7 @@ namespace transf2D
 
     }
 
-    inline glm::mat3 Rotate(float radians)
-    {
+    inline glm::mat3 Rotate(float radians) {
         return glm::mat3(
             cos(radians), -sin(radians), 0,
             sin(radians), cos(radians), 0,
@@ -41,4 +38,4 @@ namespace transf2D
         );
 
     }
-}   // namespace transf2D
+}

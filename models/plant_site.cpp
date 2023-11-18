@@ -8,7 +8,9 @@ PlantSite::PlantSite(const std::string& name, glm::vec3 corner, float length, gl
 }
 
 PlantSite::~PlantSite() {
-    // BasicSquare's destructor will be called automatically.
+    if (placedPlant_ != NULL) {
+		delete placedPlant_;
+	}
 }
 
 void PlantSite::SetPlant(Plant* plant) {
