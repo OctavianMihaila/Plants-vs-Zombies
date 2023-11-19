@@ -12,7 +12,9 @@ private:
     void UpdateZombieMovement(Zombie* zombie, float deltaTimeSeconds);
     void CheckAndRemoveLife(Zombie* zombie, std::string& zombieHash);
     void CheckAndRemovePlant(Zombie* zombie, std::vector<PlantSite*>& plantSites, int line);
-    void HandleZombiePlantSpellCollision(Zombie* zombie, std::unordered_map<std::string, std::vector<PlantSpell*>>& plantSpells, std::string& zombieHash);
+    void HandleZombiePlantSpellCollision(Zombie* zombie, std::unordered_map<std::string,
+                                            std::vector<PlantSpell*>>& plantSpells,
+                                            std::string& zombieHash);
 
     BoardManager* boardManager;
 };

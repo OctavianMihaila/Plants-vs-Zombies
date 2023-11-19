@@ -6,8 +6,12 @@
 
 namespace basic_objects
 {
-    Mesh* CreateRectangle(const std::string& name, glm::vec3 leftBottomCorner, float length, float width, glm::vec3 color, bool fill);
-    Mesh* CreateStar(const std::string& name, glm::vec3 center, float length, glm::vec3 color);
-    Mesh* CreateDiamond(const std::string& name, glm::vec3 center, float width, float height, glm::vec3 color);
-    Mesh* CreateMergedHexagons(const std::string& name, glm::vec3 center, float length, glm::vec3 firstHexagonColor, glm::vec3 secondHexagonColor);
+    Mesh* CreateRectangle(const std::string& name, glm::vec3 leftBottomCorner,
+                            float length, float width, glm::vec3 color, bool fill);
+    Mesh* CreateStar(const std::string& name, glm::vec3 center,
+                        float length, glm::vec3 color);
+    Mesh* CreateDiamond(const std::string& name, glm::vec3 center, float width,
+                        float height, glm::vec3 color);
+    Mesh* CreateMergedHexagons(const std::string& name, glm::vec3 center, float length,
+                                glm::vec3 firstHexagonColor, glm::vec3 secondHexagonColor);
 }

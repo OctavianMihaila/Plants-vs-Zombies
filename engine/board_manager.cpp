@@ -57,8 +57,10 @@ void BoardManager::RemovePlantSpell(PlantSpell* plantSpell, const std::string& s
     auto iterator = plantSpells_.find(spellHash);
 
     if (iterator != plantSpells_.end()) {
-        auto& plantVector = iterator->second; // Getting the vector of plant spells that corresponds to the key.
-        plantVector.erase(std::remove(plantVector.begin(), plantVector.end(), plantSpell), plantVector.end());
+        // Getting the vector of plant spells that corresponds to the key.
+        auto& plantVector = iterator->second;
+        plantVector.erase(std::remove(plantVector.begin(), plantVector.end(),
+                            plantSpell), plantVector.end());
 
         delete plantSpell;
 
@@ -85,8 +87,8 @@ void BoardManager::RemoveLife() {
 }
 
 void BoardManager::RemoveSpawnedCoin(Coin* coin) {
-    spawnedCoins_.erase(std::remove(spawnedCoins_.begin(), spawnedCoins_.end(), coin), spawnedCoins_.end());
-
+    spawnedCoins_.erase(std::remove(spawnedCoins_.begin(), spawnedCoins_.end(), coin),
+                                        spawnedCoins_.end());
 	return;
 }
 
@@ -99,11 +101,14 @@ void BoardManager::RemoveCollectedCoins(int cost) {
 
 void BoardManager::InitializePlantSites() {
     for (int i = 0; i < NR_PLANT_SITES; i++) {
-        float x = PLANT_SITE_SQUARE_LEFT_OFFSET + (i % 3) * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET);
+        float x = PLANT_SITE_SQUARE_LEFT_OFFSET + (i % 3) *
+            (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET);
         float y = (2 - i / 3) * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET);
         glm::vec3 center = glm::vec3(x, y, 0);
         glm::vec3 color = glm::vec3(0, 1, 0); // Green.
-        PlantSite* plantSite = assetFactory_->CreatePlantSite("plantSite" + std::to_string(i), center, PLANT_SITE_SQUARE_SIDE, color);
+        PlantSite* plantSite = assetFactory_->
+            CreatePlantSite("plantSite" + std::to_string(i),
+                              center, PLANT_SITE_SQUARE_SIDE, color);
         
         AddPlantSite(plantSite);
     }
@@ -118,14 +123,17 @@ void BoardManager::InitializeLives() {
     glm::vec3 starColor = glm::vec3(0.5f, 0.5f, 0.5f); // Grey
 
     for (int i = 0; i < NR_LIVES; i++) {
-		BasicSquare* life = assetFactory_->CreateBasicSquare("life" + std::to_string(i), lifeCenter, LIVES_SQUARE_SIDE, lifeColor, true);
+		BasicSquare* life = assetFactory_->
+            CreateBasicSquare("life" + std::to_string(i), lifeCenter,
+                                                        LIVES_SQUARE_SIDE, lifeColor, true);
 		lives_.push_back(life);
 
 		xLife -= LIVES_SQUARE_SIDE + LIVES_SQUARE_OFFSET;
 		lifeCenter = glm::vec3(xLife, yLife, 0);
 
         // Also add star representing initial coin (one in each iteration).
-        BasicStar* star = assetFactory_->CreateBasicStar("lifeStar" + std::to_string(i), starCenter, STAR_SIDE, starColor);
+        BasicStar* star = assetFactory_->CreateBasicStar("lifeStar" + std::to_string(i),
+                                                            starCenter, STAR_SIDE, starColor);
         collectedCoins_.push_back(star);
 	}
 
@@ -135,7 +143,9 @@ void BoardManager::InitializeLives() {
 void BoardManager::InitializeDamageZone() {
     glm::vec3 center = glm::vec3(DAMAGE_ZONE_LEFT_OFFSET, 0, 0);
     glm::vec3 color = glm::vec3(1, 0, 0); // Red
-    DamageZone* damageZone = assetFactory_->CreateDamageZone("damageZone", center, DAMAGE_ZONE_LENGTH, DAMAGE_ZONE_HEIGHT, color);
+    DamageZone* damageZone = assetFactory_->
+        CreateDamageZone("damageZone", center, DAMAGE_ZONE_LENGTH,
+                            DAMAGE_ZONE_HEIGHT, color);
 
     damageZone_ = damageZone;
 
@@ -155,7 +165,9 @@ void BoardManager::InitializeInventory() {
 
     for (int i = 0; i < NR_INVENTORY_SLOTS; i++) {
         // Creating inventory square in which the plant will be placed.
-        BasicSquare* inventorySquare = assetFactory_->CreateBasicSquare("inventorySquare" + std::to_string(i), center, INVENTORY_SQUARE_SIDE, emptySquareColor, false);
+        BasicSquare* inventorySquare = assetFactory_->
+            CreateBasicSquare("inventorySquare" + std::to_string(i), center,
+                                INVENTORY_SQUARE_SIDE, emptySquareColor, false);
         AddInventorySquare(inventorySquare);
 
         // Create plant inside square.
@@ -164,7 +176,9 @@ void BoardManager::InitializeInventory() {
         glm::vec3 plantColor = FindPlantColor(plantType);
 
         center = glm::vec3(x + INVENTORY_SQUARE_SIDE / 4, y + INVENTORY_SQUARE_SIDE / 2, 0);
-        Plant* plant = assetFactory_->CreatePlant("inventoryPlant" + std::to_string(i), center, DIAMOND_WIDTH, DIAMOND_HEIGHT, plantColor, plantType, cost);
+        Plant* plant = assetFactory_->
+            CreatePlant("inventoryPlant" + std::to_string(i), center,
+                            DIAMOND_WIDTH, DIAMOND_HEIGHT, plantColor, plantType, cost);
         AddInventoryPlant(plant);
 
         int nrStars = plantType;
@@ -175,7 +189,9 @@ void BoardManager::InitializeInventory() {
         // Display stars under the square (cost).
         glm::vec3 starCenter = glm::vec3(0, 0, 0);
         for (int j = 0; j < nrStars; j++) {
-            BasicStar* star = assetFactory_->CreateBasicStar("inventoryStar" + std::to_string(i) + std::to_string(j), starCenter, STAR_SIDE, starColor);
+            BasicStar* star = assetFactory_->
+                CreateBasicStar("inventoryStar" + std::to_string(i) + std::to_string(j),
+                                    starCenter, STAR_SIDE, starColor);
             AddInventoryStar(star);
         }
 
@@ -196,7 +212,8 @@ void BoardManager::InitializeThreeCoins() {
         std::uniform_real_distribution<float> distY(0.f, 720.f);
         float x = distX(mt);
         float y = distY(mt);
-		Coin* coin = assetFactory_->CreateCoin("coin" + std::to_string(i), center, COIN_SIDE, color, x, y);
+		Coin* coin = assetFactory_->
+            CreateCoin("coin" + std::to_string(i), center, COIN_SIDE, color, x, y);
 
 		spawnedCoins_.push_back(coin);
 	}
@@ -207,18 +224,24 @@ void BoardManager::InitializeThreeCoins() {
 void BoardManager::LaunchZombie() {
     std::random_device rd;
     std::mt19937 mt(rd());
-    // Generating a randoom string for the key (first digit must be between 1 and 3 and the second between 1 and 4).
+    // Generating a randoom string for the key
+    //  (first digit must be between 1 and 3 and the second between 1 and 4).
     std::uniform_int_distribution<int> distLine(1, 3);
     std::uniform_int_distribution<int> distZombieType(1, 4);
 
     int line = distLine(mt);
     int zombieType = distZombieType(mt);
     std::string zombieHash = std::to_string(line) + std::to_string(zombieType);
-    glm::vec3 center = glm::vec3(SCREEN_WIDTH, (3 - line) * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET) + PLANT_SITE_SQUARE_OFFSET / 2, 3.0f);
+    glm::vec3 center = glm::vec3(SCREEN_WIDTH, (3 - line) *
+                                    (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET) +
+                                    PLANT_SITE_SQUARE_OFFSET / 2 + HEXAGON_CALIBRATION_OFFSET, 3.0f);
     glm::vec3 neutralHexagonColor = glm::vec3(0.5f, 0.5f, 0.5f); // Grey.
-    glm::vec3 zombieColor = FindPlantColor(zombieType); // This function can be used for zombies as well.
+    // This function can be used for zombies as well.
+    glm::vec3 zombieColor = FindPlantColor(zombieType);
 
-    Zombie* zombie = assetFactory_->CreateZombie("zombie" + zombieHash, center, ZOMBIE_SIDE, zombieColor, neutralHexagonColor, zombieType);
+    Zombie* zombie = assetFactory_->
+        CreateZombie("zombie" + zombieHash, center, ZOMBIE_SIDE,
+                        zombieColor, neutralHexagonColor, zombieType);
     AddZombie(zombie, zombieHash);
 
     return;
@@ -227,7 +250,8 @@ void BoardManager::LaunchZombie() {
 void BoardManager::LaunchSpell(int line, int plantType, glm::vec3 center) {
     std::string spellHash = std::to_string(line) + std::to_string(plantType);
     glm::vec3 color = FindPlantColor(plantType);
-    PlantSpell* plantSpell = assetFactory_->CreatePlantSpell("spell" + spellHash, center, SPELL_STAR_SIDE, color, plantType);
+    PlantSpell* plantSpell = assetFactory_->
+        CreatePlantSpell("spell" + spellHash, center, SPELL_STAR_SIDE, color, plantType);
 
     AddPlantSpell(plantSpell, spellHash);
 }

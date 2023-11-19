@@ -5,7 +5,8 @@
 #include "core/engine.h"
 #include "utils/gl_utils.h"
 
-Mesh* basic_objects::CreateRectangle(const std::string& name, glm::vec3 leftBottomCorner, float length, float width, glm::vec3 color, bool fill)
+Mesh* basic_objects::CreateRectangle(const std::string& name, glm::vec3 leftBottomCorner,
+                                    float length, float width, glm::vec3 color, bool fill)
 {
     Mesh* rectangle = new Mesh(name);
     glm::vec3 corner = leftBottomCorner;
@@ -37,7 +38,8 @@ Mesh* basic_objects::CreateRectangle(const std::string& name, glm::vec3 leftBott
 }
 
 
-Mesh* basic_objects::CreateStar(const std::string& name, glm::vec3 center, float length, glm::vec3 color)
+Mesh* basic_objects::CreateStar(const std::string& name, glm::vec3 center,
+                                float length, glm::vec3 color)
 {
     Mesh* star = new Mesh(name);
     float innerRadius = length / 3.0f;
@@ -51,13 +53,15 @@ Mesh* basic_objects::CreateStar(const std::string& name, glm::vec3 center, float
 
         // Add the outer point.
         vertices.push_back(VertexFormat(
-            corner + glm::vec3(length * glm::cos(outerAngle), length * glm::sin(outerAngle), 0),
+            corner + glm::vec3(length * glm::cos(outerAngle),
+                                length * glm::sin(outerAngle), 0),
             color
         ));
 
         // Add the inner point.
         vertices.push_back(VertexFormat(
-            corner + glm::vec3(innerRadius * glm::cos(innerAngle), innerRadius * glm::sin(innerAngle), 0),
+            corner + glm::vec3(innerRadius * glm::cos(innerAngle),
+                                innerRadius * glm::sin(innerAngle), 0),
             color
         ));
     }
@@ -87,7 +91,8 @@ Mesh* basic_objects::CreateStar(const std::string& name, glm::vec3 center, float
     return star;
 }
 
-Mesh* basic_objects::CreateDiamond(const std::string& name, glm::vec3 center, float width, float height, glm::vec3 color)
+Mesh* basic_objects::CreateDiamond(const std::string& name, glm::vec3 center,
+                                    float width, float height, glm::vec3 color)
 {
     float halfWidth = width / 2;
     float halfHeight = height / 2;
@@ -119,12 +124,14 @@ Mesh* basic_objects::CreateDiamond(const std::string& name, glm::vec3 center, fl
     return diamond;
 }
 
-Mesh* basic_objects::CreateMergedHexagons(const std::string& name, glm::vec3 center, float length, glm::vec3 firstHexagonColor, glm::vec3 secondHexagonColor)
+Mesh* basic_objects::CreateMergedHexagons(const std::string& name, glm::vec3 center, float length,
+                                            glm::vec3 firstHexagonColor, glm::vec3 secondHexagonColor)
 {
     float scale_factor = 0.75f;
     Mesh* hexagon = new Mesh(name);
     glm::vec3 corner = center;
-    glm::vec3 translation = glm::vec3(0.5f * (1 - scale_factor) * length, (1 - scale_factor) * length * glm::sqrt(3) / 2, 0);
+    glm::vec3 translation = glm::vec3(0.5f * (1 - scale_factor) * length,
+                                        (1 - scale_factor) * length * glm::sqrt(3) / 2, 0);
 
     std::vector<VertexFormat> vertices =
     {
@@ -138,11 +145,21 @@ Mesh* basic_objects::CreateMergedHexagons(const std::string& name, glm::vec3 cen
 
         // Drawing second hexagon.
         VertexFormat(corner + translation, secondHexagonColor),
-        VertexFormat(corner + glm::vec3(length * scale_factor + translation.x, translation.y, 0), secondHexagonColor),
-        VertexFormat(corner + glm::vec3(length * 1.5f * scale_factor + translation.x, length * glm::sqrt(3) / 2 * scale_factor + translation.y, 0), secondHexagonColor),
-        VertexFormat(corner + glm::vec3(length * scale_factor + translation.x, length * glm::sqrt(3) * scale_factor + translation.y, 0), secondHexagonColor),
-        VertexFormat(corner + glm::vec3(translation.x, length * glm::sqrt(3) * scale_factor + translation.y, 0), secondHexagonColor),
-        VertexFormat(corner + glm::vec3(-length / 2 * scale_factor + translation.x, length * glm::sqrt(3) / 2 * scale_factor + translation.y, 0.1f), secondHexagonColor)
+        VertexFormat(corner + glm::vec3(length * scale_factor + translation.x,
+                                        translation.y, 0),
+                                        secondHexagonColor),
+        VertexFormat(corner + glm::vec3(length * 1.5f * scale_factor + translation.x,
+                                        length * glm::sqrt(3) / 2 * scale_factor + translation.y, 0),
+                                        secondHexagonColor),
+        VertexFormat(corner + glm::vec3(length * scale_factor + translation.x,
+                                        length * glm::sqrt(3) * scale_factor + translation.y, 0),
+                                        secondHexagonColor),
+        VertexFormat(corner + glm::vec3(translation.x,
+                                        length * glm::sqrt(3) * scale_factor + translation.y, 0),
+                                        secondHexagonColor),
+        VertexFormat(corner + glm::vec3(-length / 2 * scale_factor + translation.x,
+                                        length * glm::sqrt(3) / 2 * scale_factor + translation.y, 0.1f),
+                                        secondHexagonColor)
     };
 
     std::vector<unsigned int> indices = {

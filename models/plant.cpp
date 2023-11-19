@@ -1,6 +1,7 @@
 #include "plant.h"
 
-Plant::Plant(const std::string& name, glm::vec3 center, float width, float height, glm::vec3 color, int plantType, int cost) {
+Plant::Plant(const std::string& name, glm::vec3 center, float width, float height,
+                glm::vec3 color, int plantType, int cost) {
     mesh_ = basic_objects::CreateDiamond(name, center, width, height, color);
     position_ = center;
     xScale_ = 1.0f;

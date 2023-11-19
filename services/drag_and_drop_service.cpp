@@ -2,14 +2,18 @@
 
 DragAndDropService::DragAndDropService() {}
 
-void DragAndDropService::HandleInventoryPlantClick(BoardManager* boardManager, int mouseX, int mouseYInScene) {
-    int selectedPlantType = FindSelectedPlantType(boardManager->GetInventorySquares(), mouseX, mouseYInScene, INVENTORY_SQUARE_SIDE);
+void DragAndDropService::HandleInventoryPlantClick(BoardManager* boardManager, int mouseX,
+                                                    int mouseYInScene) {
+    int selectedPlantType = FindSelectedPlantType(boardManager->GetInventorySquares(),
+                                                    mouseX, mouseYInScene, INVENTORY_SQUARE_SIDE);
 
     if (selectedPlantType != -1) {
         int cost = CalculatePlantCost(selectedPlantType);
         glm::vec3 plantColor = FindPlantColor(selectedPlantType);
 
-        Plant* draggedPlant = boardManager->GetAssetFactory()->CreatePlant("draggedPlant", glm::vec3(mouseX + DIAMOND_WIDTH / 2, mouseYInScene, 1), DIAMOND_WIDTH, DIAMOND_HEIGHT, plantColor, selectedPlantType, cost);
+        Plant* draggedPlant = boardManager->GetAssetFactory()->
+            CreatePlant("draggedPlant", glm::vec3(mouseX + DIAMOND_WIDTH / 2, mouseYInScene, 1),
+                        DIAMOND_WIDTH, DIAMOND_HEIGHT, plantColor, selectedPlantType, cost);
         boardManager->setCurrentlyDraggedPlant(draggedPlant);
     }
 }
@@ -24,7 +28,8 @@ void DragAndDropService::HandlePlantRelease(BoardManager* boardManager, int mous
             glm::vec3 plantSitePosition = plantSite->GetPosition();
             glm::vec3 clickPosition = glm::vec3(mouseX, mouseYInScene, 0);
 
-            if (CheckClickInSquare(mouseX, mouseYInScene, plantSitePosition.x, plantSitePosition.y, PLANT_SITE_SQUARE_SIDE)) {
+            if (CheckClickInSquare(mouseX, mouseYInScene, plantSitePosition.x,
+                                    plantSitePosition.y, PLANT_SITE_SQUARE_SIDE)) {
                 int cost = currentlyDraggedPlant->GetCost();
                 int nrCoins = boardManager->GetCollectedCoins().size();
 
@@ -50,7 +55,8 @@ void DragAndDropService::HandlePlantDespawning(BoardManager* boardManager, int m
         glm::vec3 plantSitePosition = plantSite->GetPosition();
         glm::vec3 clickPosition = glm::vec3(mouseX, mouseYInScene, 0);
 
-        if (CheckClickInSquare(mouseX, mouseYInScene, plantSitePosition.x, plantSitePosition.y, PLANT_SITE_SQUARE_SIDE) && !plantSite->IsEmpty()) {
+        if (CheckClickInSquare(mouseX, mouseYInScene, plantSitePosition.x, plantSitePosition.y,
+                                PLANT_SITE_SQUARE_SIDE) && !plantSite->IsEmpty()) {
             plantSite->SetPlantReadyToBeRemoved(true);
             break;
         }

@@ -5,8 +5,10 @@
 float Zombie::spawnInterval_ = 0.0f;
 float Zombie::timeSinceLastSpawn_ = 0.0f;
 
-Zombie::Zombie(const std::string& name, glm::vec3 center, float length, glm::vec3 firstHexagonColor, glm::vec3 secondHexagonColor, int zombieType) {
-    mesh_ = basic_objects::CreateMergedHexagons(name, center, length, firstHexagonColor, secondHexagonColor);
+Zombie::Zombie(const std::string& name, glm::vec3 center, float length,
+                glm::vec3 firstHexagonColor, glm::vec3 secondHexagonColor, int zombieType) {
+    mesh_ = basic_objects::CreateMergedHexagons(name, center, length,
+                                                firstHexagonColor, secondHexagonColor);
     position_ = center;
     radius_ = length / 2.0f;
     xScale_ = 1.0f;

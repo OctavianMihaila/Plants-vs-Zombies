@@ -2,7 +2,8 @@
 
 PlantManager::PlantManager(BoardManager* boardManager) : boardManager(boardManager) {}
 
-void PlantManager::PlantSpellPositionUpdate(PlantSpell* plantSpell, float deltaTimeSeconds, std::string& spellHash) {
+void PlantManager::PlantSpellPositionUpdate(PlantSpell* plantSpell, float deltaTimeSeconds,
+                                            std::string& spellHash) {
     float oldXTravelDistance = plantSpell->GetXTravelDistance();
     float newXTravelDistance = oldXTravelDistance + deltaTimeSeconds * SPELL_MOVE_SPEED_RATE;
 
@@ -20,7 +21,8 @@ void PlantManager::PlantSpellPositionUpdate(PlantSpell* plantSpell, float deltaT
     }
 }
 
-void PlantManager::UpdatePlant(PlantSite* plantSite, Plant* plant, float deltaTimeSeconds, int plantNumber) {
+void PlantManager::UpdatePlant(PlantSite* plantSite, Plant* plant, float deltaTimeSeconds,
+                                int plantNumber) {
     if (plantSite->IsPlantReadyToBeRemoved()) {
         UpdatePlantRemoval(plantSite, plant, deltaTimeSeconds);
     }
@@ -29,7 +31,8 @@ void PlantManager::UpdatePlant(PlantSite* plantSite, Plant* plant, float deltaTi
     }
 }
 
-void PlantManager::UpdatePlantRemoval(PlantSite* plantSite, Plant* plant, float deltaTimeSeconds) {
+void PlantManager::UpdatePlantRemoval(PlantSite* plantSite, Plant* plant,
+                                        float deltaTimeSeconds) {
     float xScale = plant->GetXScale();
     float yScale = plant->GetYScale();
     float newXScale = xScale - deltaTimeSeconds * ANIMATION_SPEED_RATE;
@@ -45,7 +48,8 @@ void PlantManager::UpdatePlantRemoval(PlantSite* plantSite, Plant* plant, float 
     }
 }
 
-void PlantManager::UpdatePlantBehavior(PlantSite* plantSite, Plant* plant, float deltaTimeSeconds, int plantNumber) {
+void PlantManager::UpdatePlantBehavior(PlantSite* plantSite, Plant* plant, float deltaTimeSeconds,
+                                        int plantNumber) {
     int line = plantNumber / 3 + 1;
     int type = plant->GetPlantType();
     std::string spellHash = std::to_string(line) + std::to_string(type);

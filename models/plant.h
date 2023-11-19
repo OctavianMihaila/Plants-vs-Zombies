@@ -4,11 +4,12 @@
 #include <glm/glm.hpp>
 #include "../assets/basic_objects.h"
 
-#define SPELL_LAUNCH_INTERVAL 2.0f // Original was 3.0f.
+#define SPELL_LAUNCH_INTERVAL 3.0f
 
 class Plant {
 public:
-    Plant::Plant(const std::string& name, glm::vec3 center, float width, float height, glm::vec3 color, int plantType, int cost);
+    Plant::Plant(const std::string& name, glm::vec3 center, float width,
+                    float height, glm::vec3 color, int plantType, int cost);
     ~Plant();
 
     void SetXScale(float xScale);

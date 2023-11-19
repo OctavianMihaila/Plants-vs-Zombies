@@ -5,7 +5,8 @@
 
 class Coin : public BasicStar {
 public:
-    Coin(const std::string& name, glm::vec3 center, float length, glm::vec3 color, float xTranslate, float yTranslate);
+    Coin(const std::string& name, glm::vec3 center, float length,
+            glm::vec3 color, float xTranslate, float yTranslate);
 
     float GetXTranslate() const;
     float GetYTranslate() const;

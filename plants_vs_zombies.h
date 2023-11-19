@@ -12,11 +12,11 @@
 
 namespace m1
 {
-    class Tema1 : public gfxc::SimpleScene
+    class PvsZ : public gfxc::SimpleScene
     {
     public:
-        Tema1();
-        ~Tema1();
+        PvsZ();
+        ~PvsZ();
 
         void Init() override;
 

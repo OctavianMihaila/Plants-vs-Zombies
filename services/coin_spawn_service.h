@@ -10,6 +10,7 @@ public:
     CoinSpawnService();
 
     void HandleCoinSpawn(BoardManager *boardManager, float deltaTimeSeconds);
-    void HandleCoinCollection(BoardManager *boardManager, int mouseX, int mouseYInScene, bool& wasCoinClicked);
+    void HandleCoinCollection(BoardManager *boardManager, int mouseX,
+                                int mouseYInScene, bool& wasCoinClicked);
 private:
 };

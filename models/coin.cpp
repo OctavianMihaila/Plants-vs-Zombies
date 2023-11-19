@@ -3,8 +3,10 @@
 float Coin::spawnInterval_ = 0.0f;
 float Coin::timeSinceLastSpawn_ = 0.0f;
 
-Coin::Coin(const std::string& name, glm::vec3 center, float length, glm::vec3 color, float xTranslate, float yTranslate)
-    : BasicStar(name, center, length, color), isCollected_(false), xTranslate_(xTranslate), yTranslate_(yTranslate) {
+Coin::Coin(const std::string& name, glm::vec3 center, float length,
+            glm::vec3 color, float xTranslate, float yTranslate)
+    : BasicStar(name, center, length, color), isCollected_(false),
+                xTranslate_(xTranslate), yTranslate_(yTranslate) {
     // Randoomly generating a spawn interval between 7 and 12 seconds.
     std::random_device rd;
     std::mt19937 mt(rd());

@@ -15,13 +15,20 @@ public:
     }
 
     BasicStar* CreateBasicStar(const std::string& name, glm::vec3 center, float length, glm::vec3 color);
-    BasicSquare* CreateBasicSquare(const std::string& name, glm::vec3 center, float length, glm::vec3 color, bool fill);
-    Coin* GameAssetFactory::CreateCoin(const std::string& name, glm::vec3 center, float length, glm::vec3 color, float xTranslation, float yTranslation);
-    DamageZone* CreateDamageZone(const std::string& name, glm::vec3 center, float length, float width, glm::vec3 color);
-    PlantSite* CreatePlantSite(const std::string& name, glm::vec3 center, float length, glm::vec3 color);
-    PlantSpell* CreatePlantSpell(const std::string& name, glm::vec3 center, float length, glm::vec3 color, int plantType);
-    Zombie* CreateZombie(const std::string& name, glm::vec3 center, float length, glm::vec3 firstHexagonColor, glm::vec3 secondHexagonColor, int zombieType);
-    Plant* CreatePlant(const std::string& name, glm::vec3 center, float width, float height, glm::vec3 color, int plantType, int cost);
+    BasicSquare* CreateBasicSquare(const std::string& name, glm::vec3 center, float length,
+                                    glm::vec3 color, bool fill);
+    Coin* GameAssetFactory::CreateCoin(const std::string& name, glm::vec3 center, float length,
+                                        glm::vec3 color, float xTranslation, float yTranslation);
+    DamageZone* CreateDamageZone(const std::string& name, glm::vec3 center, float length,
+                                    float width, glm::vec3 color);
+    PlantSite* CreatePlantSite(const std::string& name, glm::vec3 center,
+                                float length, glm::vec3 color);
+    PlantSpell* CreatePlantSpell(const std::string& name, glm::vec3 center, float length,
+                                    glm::vec3 color, int plantType);
+    Zombie* CreateZombie(const std::string& name, glm::vec3 center, float length,
+                            glm::vec3 firstHexagonColor, glm::vec3 secondHexagonColor, int zombieType);
+    Plant* CreatePlant(const std::string& name, glm::vec3 center, float width,
+                        float height, glm::vec3 color, int plantType, int cost);
     void DestroyObject(Mesh* object);
 private:
     GameAssetFactory() {}

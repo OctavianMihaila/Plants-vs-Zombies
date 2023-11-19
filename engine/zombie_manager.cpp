@@ -26,7 +26,8 @@ void ZombieManager::HandleZombieSpawn(float deltaTimeSeconds) {
     }
 }
 
-void ZombieManager::UpdateZombieRemoval(Zombie* zombie, std::string& zombieHash, float deltaTimeSeconds) {
+void ZombieManager::UpdateZombieRemoval(Zombie* zombie, std::string& zombieHash,
+                                        float deltaTimeSeconds) {
     float xScale = zombie->GetXScale();
     float yScale = zombie->GetYScale();
     float newXScale = xScale - deltaTimeSeconds * ANIMATION_SPEED_RATE;
@@ -62,8 +63,10 @@ void ZombieManager::CheckAndRemovePlant(Zombie* zombie, std::vector<PlantSite*>&
 
     for (PlantSite* plantSite : plantSites) {
         if (!plantSite->IsEmpty()) {
-            float plantSiteRightOffset = SCREEN_WIDTH - PLANT_SITE_SQUARE_LEFT_OFFSET - (count % 3) * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET) - PLANT_SITE_SQUARE_SIDE;
-            if (line == ((count / 3) + 1) && zombie->GetXTravelDistance() > plantSiteRightOffset && zombie->GetXTravelDistance() < plantSiteRightOffset + PLANT_SITE_SQUARE_SIDE) {
+            float plantSiteRightOffset = SCREEN_WIDTH - PLANT_SITE_SQUARE_LEFT_OFFSET - (count % 3) 
+                * (PLANT_SITE_SQUARE_SIDE + PLANT_SITE_SQUARE_OFFSET) - PLANT_SITE_SQUARE_SIDE;
+            if (line == ((count / 3) + 1) && zombie->GetXTravelDistance() > plantSiteRightOffset 
+                && zombie->GetXTravelDistance() < plantSiteRightOffset + PLANT_SITE_SQUARE_SIDE) {
                 plantSite->SetPlantReadyToBeRemoved(true);
             }
         }
@@ -72,7 +75,9 @@ void ZombieManager::CheckAndRemovePlant(Zombie* zombie, std::vector<PlantSite*>&
     }
 }
 
-void ZombieManager::HandleZombiePlantSpellCollision(Zombie* zombie, std::unordered_map<std::string, std::vector<PlantSpell*>>& plantSpells, std::string& zombieHash) {
+void ZombieManager::HandleZombiePlantSpellCollision(Zombie* zombie, std::unordered_map<std::string,
+                                                    std::vector<PlantSpell*>>& plantSpells,
+                                                    std::string& zombieHash) {
     for (auto const& x : plantSpells) {
         std::vector<PlantSpell*> plantSpells = x.second;
         std::string spellHash = x.first;
@@ -85,7 +90,8 @@ void ZombieManager::HandleZombiePlantSpellCollision(Zombie* zombie, std::unorder
             float plantRadius = plantSpell->GetRadius();
             float zombieRadius = zombie->GetRadius();
 
-            if (CheckCollision(plantSpellCenter, zombieCenter, plantRadius, zombieRadius) && spellHash == zombieHash) {
+            if (CheckCollision(plantSpellCenter, zombieCenter, plantRadius,
+                                zombieRadius) && spellHash == zombieHash) {
                 boardManager->RemovePlantSpell(plantSpell, spellHash);
 
                 if (zombie->GetTotalDamageTaken() == 2 && !zombie->IsReadyToBeRemoved()) {

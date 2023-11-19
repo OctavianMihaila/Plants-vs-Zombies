@@ -12,7 +12,8 @@ void CoinSpawnService::HandleCoinSpawn(BoardManager *boardManager, float deltaTi
     }
 }
 
-void CoinSpawnService::HandleCoinCollection(BoardManager *boardManager, int mouseX, int mouseYInScene, bool& wasCoinClicked) {
+void CoinSpawnService::HandleCoinCollection(BoardManager *boardManager, int mouseX,
+                                            int mouseYInScene, bool& wasCoinClicked) {
     std::vector<Coin*> spawnedCoins_ = boardManager->GetSpawnedCoins();
 
     for (Coin* coin : spawnedCoins_) {
@@ -27,7 +28,9 @@ void CoinSpawnService::HandleCoinCollection(BoardManager *boardManager, int mous
             int starIndex = boardManager->GetNrCollectedCoins();
             glm::vec3 starCenter = glm::vec3(0, 0, 0);
             glm::vec3 starColor = glm::vec3(0.5f, 0.5f, 0.5f);
-            BasicStar* basicStar = boardManager->GetAssetFactory()->CreateBasicStar("lifeStar" + std::to_string(starIndex), starCenter, STAR_SIDE, starColor);
+            BasicStar* basicStar = boardManager->
+                GetAssetFactory()->CreateBasicStar("lifeStar" + std::to_string(starIndex),
+                                                    starCenter, STAR_SIDE, starColor);
 
             boardManager->AddCollectedCoin(basicStar);
             boardManager->RemoveSpawnedCoin(coin);

@@ -1,6 +1,7 @@
 #include "plant_spell.h"
 
-PlantSpell::PlantSpell(const std::string& name, glm::vec3 center, float length, glm::vec3 color, int plantType)
+PlantSpell::PlantSpell(const std::string& name, glm::vec3 center,
+						float length, glm::vec3 color, int plantType)
     : BasicStar(name, center, length, color),
       plantType_(plantType) {
     xTravelDistance_ = 0.0f;

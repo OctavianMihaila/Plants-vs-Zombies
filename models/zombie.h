@@ -5,7 +5,8 @@
 
 class Zombie {
 public:
-	Zombie::Zombie(const std::string& name, glm::vec3 center, float length, glm::vec3 firstHexagonColor, glm::vec3 secondHexagonColor, int zombieType);
+	Zombie::Zombie(const std::string& name, glm::vec3 center, float length,
+					glm::vec3 firstHexagonColor, glm::vec3 secondHexagonColor, int zombieType);
 	~Zombie();
 
 	void SetReadyToBeRemoved(bool readyToBeRemoved);

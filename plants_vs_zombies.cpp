@@ -2,15 +2,15 @@
 #include <string>
 #include <iostream>
 
-#include "lab_m1/tema1/tema1.h"
+#include "lab_m1/tema1/plants_vs_zombies.h"
 
 using namespace std;
 using namespace m1;
 
-Tema1::Tema1() : boardManager(NULL), plantManager(NULL), zombieManager(NULL) {}
-Tema1::~Tema1() {}
+PvsZ::PvsZ() : boardManager(NULL), plantManager(NULL), zombieManager(NULL) {}
+PvsZ::~PvsZ() {}
 
-void Tema1::Init() {
+void PvsZ::Init() {
     glm::ivec2 resolution = window->GetResolution();
     auto camera = GetSceneCamera();
     camera->SetOrthographic(0, (float)resolution.x, 0, (float)resolution.y, 0.01f, 400);
@@ -32,7 +32,7 @@ void Tema1::Init() {
     boardManager.InitializeInventory();
 }
 
-void Tema1::FrameStart() {
+void PvsZ::FrameStart() {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -40,7 +40,7 @@ void Tema1::FrameStart() {
     glViewport(0, 0, resolution.x, resolution.y);
 }
 
-void Tema1::Update(float deltaTimeSeconds) {
+void PvsZ::Update(float deltaTimeSeconds) {
     glm::ivec2 resolution = window->GetResolution();
     modelMatrix = glm::mat3(1);
 
@@ -62,7 +62,7 @@ void Tema1::Update(float deltaTimeSeconds) {
     zombieManager.HandleZombieSpawn(deltaTimeSeconds);
 }
 
-void Tema1::RenderSpawnedCoins() {
+void PvsZ::RenderSpawnedCoins() {
     std::vector<Coin*> spawnedCoins = boardManager.GetSpawnedCoins();
 
     if (!(spawnedCoins.empty())) {
@@ -70,12 +70,13 @@ void Tema1::RenderSpawnedCoins() {
             float x = coin->GetXTranslate();
             float y = coin->GetYTranslate();
 
-            RenderMesh2D(coin->GetMesh(), shaders["VertexColor"], modelMatrix * transf2D::Translate(x, y) * transf2D::Rotate(0.95));
+            RenderMesh2D(coin->GetMesh(), shaders["VertexColor"],
+                            modelMatrix * transf2D::Translate(x, y) * transf2D::Rotate(0.95));
         }
     }
 }
 
-void Tema1::RenderZombies(float deltaTimeSeconds) {
+void PvsZ::RenderZombies(float deltaTimeSeconds) {
     std::unordered_map<std::string, std::vector<Zombie*>> zombies = boardManager.GetZombies();
 
     for (auto const& x : zombies) {
@@ -100,7 +101,7 @@ void Tema1::RenderZombies(float deltaTimeSeconds) {
     }
 }
 
-void Tema1::RenderPlantSpells(float deltaTimeSeconds) {
+void PvsZ::RenderPlantSpells(float deltaTimeSeconds) {
     std::unordered_map<std::string, std::vector<PlantSpell*>> plantSpells = boardManager.GetPlantSpells();
     
     for (auto const& x : plantSpells) {
@@ -114,16 +115,18 @@ void Tema1::RenderPlantSpells(float deltaTimeSeconds) {
             glm::vec3 plantSpellCenter = plantSpell->GetPosition();
 
             RenderMesh2D(plantSpell->GetMesh(), shaders["VertexColor"], modelMatrix
-                * transf2D::Translate(plantSpellCenter.x + INVENTORY_SQUARE_SIDE / 2, plantSpellCenter.y + INVENTORY_SQUARE_SIDE / 2) // Translate to the center of the plant site.
+                * transf2D::Translate(plantSpellCenter.x + INVENTORY_SQUARE_SIDE / 2,
+                     plantSpellCenter.y + INVENTORY_SQUARE_SIDE / 2) // Translate to the center of the plant site.
                 * transf2D::Rotate(plantSpell->GetRotationValue()) // Rotate the plant spell.
-                * transf2D::Translate(-plantSpellCenter.x + plantSpell->GetXTravelDistance(), -plantSpellCenter.y)); // Translate back to the center of the plant spell.
+                * transf2D::Translate(-plantSpellCenter.x + plantSpell->GetXTravelDistance(),
+                    -plantSpellCenter.y)); // Translate back to the center of the plant spell.
 
             plantManager.PlantSpellPositionUpdate(plantSpell, deltaTimeSeconds, spellHash);
         }
     }
 }
 
-void Tema1::RenderDraggedPlant() {
+void PvsZ::RenderDraggedPlant() {
     Plant* currentlyDraggedPlant = boardManager.GetCurrentlyDraggedPlant();
 
     if (currentlyDraggedPlant != NULL) {
@@ -132,17 +135,18 @@ void Tema1::RenderDraggedPlant() {
         float xTranslate = currentMouseX - plantPosition.x - DIAMOND_WIDTH / 2;
         float yTranslate = currentMouseY - plantPosition.y;
 
-        RenderMesh2D(currentlyDraggedPlant->GetMesh(), shaders["VertexColor"], modelMatrix * transf2D::Translate(xTranslate, yTranslate));
+        RenderMesh2D(currentlyDraggedPlant->GetMesh(), shaders["VertexColor"],
+                        modelMatrix * transf2D::Translate(xTranslate, yTranslate));
     }
 }
 
-void Tema1::RenderDamageZone() {
+void PvsZ::RenderDamageZone() {
     DamageZone* damageZone = boardManager.GetDamageZone();
 
     RenderMesh2D(damageZone->GetMesh(), shaders["VertexColor"], modelMatrix);
 }
 
-void Tema1::RenderPlantSites(float deltaTimeSeconds) {
+void PvsZ::RenderPlantSites(float deltaTimeSeconds) {
     std::vector<PlantSite*> plantSites = boardManager.GetPlantSites();
 
     for (int i = 0; i < NR_PLANT_SITES; i++) {
@@ -169,7 +173,7 @@ void Tema1::RenderPlantSites(float deltaTimeSeconds) {
     }
 }
 
-void Tema1::RenderInventory() {
+void PvsZ::RenderInventory() {
     std::vector<BasicSquare*> inventorySquares = boardManager.GetInventorySquares();
     std::vector<BasicStar*> inventoryStars = boardManager.GetInventoryStars();
     std::vector<Plant*> inventoryPlants = boardManager.GetInventoryPlants();
@@ -184,14 +188,16 @@ void Tema1::RenderInventory() {
         }
 
         for (int j = 0; j < nrStars; j++) {
-            float x = INVENTORY_STAR_LEFT_OFFSET + i * (INVENTORY_SQUARE_SIDE + INVENTORY_SQUARE_OFFSET) + j * (STAR_SIDE + STAR_OFFSET) - STAR_SYMMETRY_VALUE;
+            float x = INVENTORY_STAR_LEFT_OFFSET + i * (INVENTORY_SQUARE_SIDE 
+                + INVENTORY_SQUARE_OFFSET) + j * (STAR_SIDE + STAR_OFFSET) - STAR_SYMMETRY_VALUE;
             float y = SCREEN_HEIGHT - SQUARE_SIDE - INVENTORY_STAR_TOP_OFFSET;
-            RenderMesh2D(inventoryStars[i]->GetMesh(), shaders["VertexColor"], modelMatrix * transf2D::Translate(x, y) * transf2D::Rotate(0.95));
+            RenderMesh2D(inventoryStars[i]->GetMesh(), shaders["VertexColor"],
+                            modelMatrix * transf2D::Translate(x, y) * transf2D::Rotate(0.95));
         }
     }
 }
 
-void Tema1::RenderLivesAndCollectedCoins() {
+void PvsZ::RenderLivesAndCollectedCoins() {
     float xLife = SCREEN_WIDTH - LIVES_RIGHT_OFFSET - LIVES_SQUARE_OFFSET;
     float yLife = SCREEN_HEIGHT - LIVES_TOP_OFFSET - LIVES_SQUARE_SIDE;
     float xStar = xLife - LIVES_SQUARE_SIDE - STAR_SIDE + STAR_SYMMETRY_VALUE;
@@ -211,29 +217,32 @@ void Tema1::RenderLivesAndCollectedCoins() {
     for (int i = 0; i < nrCollectedCoins; i++) {
         // Scale the star.
         std::vector<BasicStar*> collectedCoins = boardManager.GetCollectedCoins();
-        RenderMesh2D(collectedCoins[i]->GetMesh(), shaders["VertexColor"], modelMatrix * transf2D::Translate(xStar, yStar) * transf2D::Rotate(0.95));
+        RenderMesh2D(collectedCoins[i]->GetMesh(), shaders["VertexColor"],
+                        modelMatrix * transf2D::Translate(xStar, yStar) * transf2D::Rotate(0.95));
 
         xStar += STAR_OFFSET + STAR_SIDE;
     }
 }
 
-void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY) {
+void PvsZ::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY) {
     int windowHeight = window->GetResolution().y;
 
     currentMouseX = mouseX;
     currentMouseY = windowHeight - mouseY;
 }
 
-void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods) {
+void PvsZ::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods) {
     bool wasCoinClicked = false;
     int windowHeight = window->GetResolution().y;
     int mouseYInScene = windowHeight - mouseY;
 
-    if (button == GLFW_MOUSE_BUTTON_RIGHT) { // This is left click, but in the framework it is called right click.
+    // This is left click, but in the framework it is called right click.
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) { 
         coinSpawnService.HandleCoinCollection(&boardManager, mouseX, mouseYInScene, wasCoinClicked);
     }
 
-    if (button == GLFW_MOUSE_BUTTON_3) { // This is right click, but in the framework it is called left click.
+    // This is right click, but in the framework it is called left click.
+    if (button == GLFW_MOUSE_BUTTON_3) {
         dragAndDropService.HandlePlantDespawning(&boardManager, mouseX, mouseYInScene);
     }
 
@@ -242,7 +251,7 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods) {
     }
 }
 
-void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods) {
+void PvsZ::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods) {
     int windowHeight = window->GetResolution().y;
     int mouseYInScene = windowHeight - mouseY;
 
